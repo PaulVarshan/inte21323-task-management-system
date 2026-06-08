@@ -7,4 +7,8 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 
+app.get("/", (req, res) => {
+    res.send("Backend is working");
+});
+
 export default app;
