@@ -17,10 +17,9 @@ export const authenticate =
   next: NextFunction
 ) => {
 
-  const authHeader =
-    req.headers.authorization;
+  const token = req.cookies?.token;
 
-  if (!authHeader) {
+  if (!token) {
 
     return res.status(401)
       .json({
@@ -29,9 +28,6 @@ export const authenticate =
       });
 
   }
-
-  const token =
-    authHeader.split(" ")[1];
 
   try {
 

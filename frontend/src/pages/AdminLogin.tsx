@@ -21,9 +21,9 @@ export const AdminLoginPage: React.FC = () => {
 
     try {
       const response = await api.post('/adminLogin', { email, password });
-      const { token, user } = response.data;
+      const { user } = response.data;
       
-      login(user, token);
+      login(user);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. You might not have Admin privileges.');

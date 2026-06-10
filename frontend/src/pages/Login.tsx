@@ -21,10 +21,9 @@ export const LoginPage: React.FC = () => {
 
     try {
       const response = await api.post('/login', { email, password });
-      // The backend returns { token, user: { ... } }
-      const { token, user } = response.data;
+      const { user } = response.data;
       
-      login(user, token);
+      login(user);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');

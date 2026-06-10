@@ -31,7 +31,16 @@ export const login = async (req: Request, res: Response) => {
     // Normal login only allows Collaborator and Project Manager
     const allowedRoles = ["Collaborator", "Project Manager"];
     const result = await loginUser(email, password, allowedRoles);
-    res.json(result);
+    
+    // Set HttpOnly cookie
+    res.cookie("token", result.token, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    res.json({ success: true, user: result.user });
   } catch (error: any) {
     res.status(401).json({ success: false, message: error.message });
   }
@@ -43,8 +52,31 @@ export const adminLogin = async (req: Request, res: Response) => {
     // Admin login only allows Admin
     const allowedRoles = ["Admin"];
     const result = await loginUser(email, password, allowedRoles);
-    res.json(result);
+    
+    // Set HttpOnly cookie
+    res.cookie("token", result.token, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    res.json({ success: true, user: result.user });
   } catch (error: any) {
     res.status(401).json({ success: false, message: error.message });
   }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+  });
+  res.json({ success: true, message: "Logged out successfully" });
+};
+
+export const checkAuth = async (req: any, res: Response) => {
+  // If the request makes it here, the auth.middleware verified the cookie
+  res.json({ success: true, user: req.user });
 };
