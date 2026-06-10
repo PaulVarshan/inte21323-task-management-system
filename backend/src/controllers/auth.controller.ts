@@ -25,30 +25,26 @@ export const register = async (req: Request, res: Response) => {
     }
 };
 
-export const login = async (
-  req: Request,
-  res: Response
-) => {
-
+export const login = async (req: Request, res: Response) => {
   try {
-
-    const { email, password } =
-      req.body;
-
-    const result =
-      await loginUser(
-        email,
-        password
-      );
-
+    const { email, password } = req.body;
+    // Normal login only allows Collaborator and Project Manager
+    const allowedRoles = ["Collaborator", "Project Manager"];
+    const result = await loginUser(email, password, allowedRoles);
     res.json(result);
-
   } catch (error: any) {
+    res.status(401).json({ success: false, message: error.message });
+  }
+};
 
-    res.status(401).json({
-      success: false,
-      message: error.message
-    });
-
+export const adminLogin = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    // Admin login only allows Admin
+    const allowedRoles = ["Admin"];
+    const result = await loginUser(email, password, allowedRoles);
+    res.json(result);
+  } catch (error: any) {
+    res.status(401).json({ success: false, message: error.message });
   }
 };

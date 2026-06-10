@@ -55,7 +55,8 @@ export const registerUser = async (
 
 export const loginUser = async (
   email: string,
-  password: string
+  password: string,
+  allowedRoles: string[]
 ) => {
 
   const user = await prisma.user.findUnique({
@@ -68,29 +69,33 @@ export const loginUser = async (
     throw new Error("Invalid credentials");
   }
 
-  const validPassword =
-    await bcrypt.compare(
-      password,
-      user.password_hash
-    );
+  const validPassword = await bcrypt.compare(
+    password,
+    user.password_hash
+  );
 
   if (!validPassword) {
     throw new Error("Invalid credentials");
   }
 
-  const userRole =
-    await prisma.userRole.findFirst({
-      where: {
-        user_id: user.user_id
-      },
-      include: {
-        role: true
-      }
-    });
+  const userRole = await prisma.userRole.findFirst({
+    where: {
+      user_id: user.user_id
+    },
+    include: {
+      role: true
+    }
+  });
+
+  const roleName = userRole?.role.role_name || "Collaborator";
+
+  if (!allowedRoles.includes(roleName)) {
+    throw new Error("Unauthorized role for this login portal");
+  }
 
   const token = generateToken(
     user.user_id.toString(),
-    userRole?.role.role_name || "Collaborator"
+    roleName
   );
 
   return {
@@ -99,9 +104,7 @@ export const loginUser = async (
       user_id: user.user_id,
       username: user.username,
       email: user.email,
-      role:
-        userRole?.role.role_name ||
-        "Collaborator"
+      role: roleName
     }
   };
 };
