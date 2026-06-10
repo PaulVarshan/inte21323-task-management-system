@@ -1,29 +1,28 @@
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
+import { generateToken } from "../utils/jwt";
 
-const prisma = new PrismaClient();
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 export const registerUser = async (
     username: string,
     email: string,
     password: string
 ) => {
-
-    // Check email already exists
     const existingUser = await prisma.user.findUnique({
-        where: {
-            email
-        }
+        where: { email }
     });
 
     if (existingUser) {
         throw new Error("Email already exists");
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
     const user = await prisma.user.create({
         data: {
             username,
@@ -32,18 +31,14 @@ export const registerUser = async (
         }
     });
 
-    // Find Collaborator role
     const collaboratorRole = await prisma.role.findUnique({
-        where: {
-            role_name: "Collaborator"
-        }
+        where: { role_name: "Collaborator" }
     });
 
     if (!collaboratorRole) {
         throw new Error("Collaborator role not found");
     }
 
-    // Assign Collaborator role
     await prisma.userRole.create({
         data: {
             user_id: user.user_id,
@@ -58,3 +53,55 @@ export const registerUser = async (
     };
 };
 
+export const loginUser = async (
+  email: string,
+  password: string
+) => {
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email
+    }
+  });
+
+  if (!user) {
+    throw new Error("Invalid credentials");
+  }
+
+  const validPassword =
+    await bcrypt.compare(
+      password,
+      user.password_hash
+    );
+
+  if (!validPassword) {
+    throw new Error("Invalid credentials");
+  }
+
+  const userRole =
+    await prisma.userRole.findFirst({
+      where: {
+        user_id: user.user_id
+      },
+      include: {
+        role: true
+      }
+    });
+
+  const token = generateToken(
+    user.user_id.toString(),
+    userRole?.role.role_name || "Collaborator"
+  );
+
+  return {
+    token,
+    user: {
+      user_id: user.user_id,
+      username: user.username,
+      email: user.email,
+      role:
+        userRole?.role.role_name ||
+        "Collaborator"
+    }
+  };
+};
