@@ -80,3 +80,18 @@ export const checkAuth = async (req: any, res: Response) => {
   // If the request makes it here, the auth.middleware verified the cookie
   res.json({ success: true, user: req.user });
 };
+
+import { PrismaClient } from "../generated/prisma/client";
+const prisma = new PrismaClient();
+
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: { is_active: true },
+      select: { user_id: true, username: true, email: true }
+    });
+    res.json({ success: true, data: users });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
