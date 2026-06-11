@@ -23,6 +23,13 @@ import { CreateProjectPage } from './pages/CreateProjectPage';
 import { EditProjectPage } from './pages/EditProjectPage';
 import { ProjectDetailsPage } from './pages/ProjectDetailsPage';
 
+// Tasks and Teams Pages
+import { TasksListPage } from './pages/TasksListPage';
+import { CreateTaskPage } from './pages/CreateTaskPage';
+import { EditTaskPage } from './pages/EditTaskPage';
+import { TeamsListPage } from './pages/TeamsListPage';
+import { AddTeamMemberPage } from './pages/AddTeamMemberPage';
+
 function App() {
   return (
     <Routes>
@@ -40,8 +47,16 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<ComingSoonPage title="Admin Dashboard" />} />
           <Route path="users" element={<EmptyTablePage title="User Management" columns={['Name', 'Email', 'Role', 'Status', 'Actions']} actionLabel="Create User" />} />
-          <Route path="projects" element={<EmptyTablePage title="All Projects" columns={['Project Name', 'Creator', 'Status', 'Actions']} actionLabel="Create Project" />} />
-          <Route path="tasks" element={<EmptyTablePage title="All Tasks" columns={['Task Title', 'Project', 'Assignee', 'Status', 'Actions']} actionLabel="Create Task" />} />
+          
+          <Route path="projects" element={<ProjectsListPage />} />
+          <Route path="projects/new" element={<CreateProjectPage />} />
+          <Route path="projects/edit/:id" element={<EditProjectPage />} />
+          <Route path="projects/:id" element={<ProjectDetailsPage />} />
+          
+          <Route path="tasks" element={<TasksListPage />} />
+          <Route path="tasks/new" element={<CreateTaskPage />} />
+          <Route path="tasks/edit/:id" element={<EditTaskPage />} />
+          
           <Route path="reports" element={<ComingSoonPage title="System Reports" />} />
           <Route path="notifications" element={<ComingSoonPage title="Notifications" />} />
           <Route path="" element={<Navigate to="dashboard" replace />} />
@@ -56,8 +71,12 @@ function App() {
           <Route path="projects/edit/:id" element={<EditProjectPage />} />
           <Route path="projects/:id" element={<ProjectDetailsPage />} />
           
-          <Route path="teams" element={<EmptyTablePage title="Project Teams" columns={['Project Name', 'Member', 'Role', 'Actions']} actionLabel="Add Member" />} />
-          <Route path="tasks" element={<EmptyTablePage title="Project Tasks" columns={['Task Title', 'Priority', 'Due Date', 'Status', 'Actions']} actionLabel="Create Task" />} />
+          <Route path="teams" element={<TeamsListPage />} />
+          <Route path="teams/new" element={<AddTeamMemberPage />} />
+          
+          <Route path="tasks" element={<TasksListPage />} />
+          <Route path="tasks/new" element={<CreateTaskPage />} />
+          <Route path="tasks/edit/:id" element={<EditTaskPage />} />
           <Route path="reports" element={<ComingSoonPage title="Project Reports" />} />
           <Route path="notifications" element={<ComingSoonPage title="Notifications" />} />
           <Route path="" element={<Navigate to="dashboard" replace />} />
@@ -66,8 +85,13 @@ function App() {
         {/* Collaborator Routes */}
         <Route path="/collaborator" element={<CollaboratorLayout />}>
           <Route path="dashboard" element={<ComingSoonPage title="Collaborator Dashboard" />} />
-          <Route path="tasks" element={<EmptyTablePage title="My Tasks" columns={['Task Title', 'Project', 'Due Date', 'Status', 'Actions']} />} />
-          <Route path="projects" element={<ComingSoonPage title="Project Details" />} />
+          
+          <Route path="tasks" element={<TasksListPage />} />
+          <Route path="tasks/edit/:id" element={<EditTaskPage />} />
+          
+          <Route path="projects" element={<ProjectsListPage />} />
+          <Route path="projects/:id" element={<ProjectDetailsPage />} />
+          
           <Route path="comments" element={<ComingSoonPage title="Task Comments" />} />
           <Route path="attachments" element={<ComingSoonPage title="Attachments" />} />
           <Route path="notifications" element={<ComingSoonPage title="Notifications" />} />

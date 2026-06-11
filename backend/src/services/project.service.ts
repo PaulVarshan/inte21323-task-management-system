@@ -155,6 +155,30 @@ export const getProjectMembers = async (projectId: number, requesterId: number, 
   });
 };
 
+export const getAllTeamMembers = async (requesterId: number, requesterRole: string) => {
+  if (requesterRole === "Admin") {
+    return prisma.projectTeam.findMany({
+      include: {
+        project: { select: { project_name: true } },
+        user: { select: { user_id: true, username: true, email: true } }
+      }
+    });
+  }
+
+  return prisma.projectTeam.findMany({
+    where: {
+      OR: [
+        { project: { created_by: requesterId } },
+        { project: { team_members: { some: { user_id: requesterId } } } }
+      ]
+    },
+    include: {
+      project: { select: { project_name: true } },
+      user: { select: { user_id: true, username: true, email: true } }
+    }
+  });
+};
+
 export const updateMemberRole = async (projectId: number, targetUserId: number, projectRole: string, requesterId: number, requesterRole: string) => {
   const project = await prisma.project.findUnique({ where: { project_id: projectId } });
   

@@ -21,6 +21,8 @@ router.delete("/:id", projectController.deleteProject);
 // TEAM MANAGEMENT
 // =======================
 
+router.get("/all/members", projectController.getAllTeamMembers);
+
 router.post("/:id/members", projectController.addMember);
 router.get("/:id/members", projectController.getMembers);
 router.put("/:id/members/:userId", projectController.updateMemberRole);

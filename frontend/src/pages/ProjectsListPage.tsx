@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { getProjects, deleteProject } from '../services/project.service';
 import type { Project } from '../services/project.service';
 import { Button } from '../components/ui/Button';
+import { useAuth } from '../context/AuthContext';
 
 export const ProjectsListPage: React.FC = () => {
+  const { user: currentUser } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -51,11 +53,13 @@ export const ProjectsListPage: React.FC = () => {
       <div className="glass-panel" style={{ padding: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <h1>Projects</h1>
-          <div style={{ width: '200px' }}>
-            <Link to="/projects/new">
+          {currentUser?.role !== 'Collaborator' && (
+            <div style={{ width: '200px' }}>
+              <Link to="new">
               <Button>Create New Project</Button>
             </Link>
-          </div>
+            </div>
+          )}
         </div>
 
         {error && <div className="error-message">{error}</div>}
@@ -95,18 +99,22 @@ export const ProjectsListPage: React.FC = () => {
                 <span>End: {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A'}</span>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <Link to={`/projects/${project.project_id}`} style={{ flex: 1 }}>
+                <Link to={`${project.project_id}`} style={{ flex: 1 }}>
                   <Button style={{ width: '100%', background: 'var(--surface-color)' }}>View</Button>
                 </Link>
-                <Link to={`/projects/edit/${project.project_id}`} style={{ flex: 1 }}>
-                  <Button style={{ width: '100%', background: 'var(--surface-color)' }}>Edit</Button>
-                </Link>
-                <Button 
-                  style={{ flex: 1, background: 'var(--error-color)' }}
-                  onClick={() => handleDelete(project.project_id)}
-                >
-                  Delete
-                </Button>
+                {currentUser?.role !== 'Collaborator' && (
+                  <>
+                    <Link to={`edit/${project.project_id}`} style={{ flex: 1 }}>
+                      <Button style={{ width: '100%', background: 'var(--surface-color)' }}>Edit</Button>
+                    </Link>
+                    <Button 
+                      style={{ flex: 1, background: 'var(--error-color)' }}
+                      onClick={() => handleDelete(project.project_id)}
+                    >
+                      Delete
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           ))}

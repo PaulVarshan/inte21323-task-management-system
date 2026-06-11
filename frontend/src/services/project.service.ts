@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const envApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/auth';
+const API_URL = envApiUrl.replace(/\/auth\/?$/, '');
 
 const projectApi = axios.create({
   baseURL: API_URL,
@@ -33,6 +34,9 @@ export interface ProjectMember {
   user_id: number;
   project_role: string;
   joined_at: string;
+  project?: {
+    project_name: string;
+  };
   user: {
     user_id: number;
     username: string;
@@ -44,6 +48,7 @@ export interface User {
   user_id: number;
   username: string;
   email: string;
+  role?: string;
 }
 
 export const getProjects = async () => {
@@ -74,6 +79,11 @@ export const deleteProject = async (id: number) => {
 // Team Management
 export const getProjectMembers = async (id: number) => {
   const response = await projectApi.get(`/projects/${id}/members`);
+  return response.data.data as ProjectMember[];
+};
+
+export const getAllTeamMembers = async () => {
+  const response = await projectApi.get('/projects/all/members');
   return response.data.data as ProjectMember[];
 };
 

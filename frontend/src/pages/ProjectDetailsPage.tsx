@@ -95,7 +95,7 @@ export const ProjectDetailsPage: React.FC = () => {
     <div className="dashboard-container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ margin: 0 }}>Project Details</h1>
-        <Link to="/projects">
+        <Link to="..">
           <Button style={{ background: 'var(--surface-color)' }}>Back to Projects</Button>
         </Link>
       </div>

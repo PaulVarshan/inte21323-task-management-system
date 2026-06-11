@@ -88,9 +88,30 @@ export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await prisma.user.findMany({
       where: { is_active: true },
-      select: { user_id: true, username: true, email: true }
+      select: { 
+        user_id: true, 
+        username: true, 
+        email: true,
+        user_roles: {
+          select: {
+            role: {
+              select: {
+                role_name: true
+              }
+            }
+          }
+        }
+      }
     });
-    res.json({ success: true, data: users });
+    
+    const mappedUsers = users.map(u => ({
+      user_id: u.user_id,
+      username: u.username,
+      email: u.email,
+      role: u.user_roles?.[0]?.role?.role_name || 'Collaborator'
+    }));
+
+    res.json({ success: true, data: mappedUsers });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

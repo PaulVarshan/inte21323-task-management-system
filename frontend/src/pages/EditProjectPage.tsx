@@ -69,7 +69,7 @@ export const EditProjectPage: React.FC = () => {
         end_date: formData.end_date || null,
         status: formData.status
       });
-      navigate('/projects');
+      navigate('..', { relative: 'path' });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to update project');
     } finally {
@@ -154,7 +154,7 @@ export const EditProjectPage: React.FC = () => {
             <Button type="submit" style={{ flex: 2 }} disabled={saving}>
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
-            <Link to="/projects" style={{ flex: 1 }}>
+            <Link to=".." relative="path" style={{ flex: 1 }}>
               <Button type="button" style={{ width: '100%', background: 'var(--surface-color)' }}>Cancel</Button>
             </Link>
           </div>

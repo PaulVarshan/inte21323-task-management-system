@@ -157,6 +157,23 @@ export const getMembers = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const getAllTeamMembers = async (req: AuthRequest, res: Response) => {
+  try {
+    const requesterId = parseInt(req.user.userId as string);
+    const requesterRole = req.user.role as string;
+    
+    const members = await projectService.getAllTeamMembers(requesterId, requesterRole);
+    
+    return res.status(200).json({
+      success: true,
+      message: "All team members retrieved successfully",
+      data: members
+    });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message || "Failed to retrieve members" });
+  }
+};
+
 export const updateMemberRole = async (req: AuthRequest, res: Response) => {
   try {
     const projectId = parseInt(req.params.id as string);

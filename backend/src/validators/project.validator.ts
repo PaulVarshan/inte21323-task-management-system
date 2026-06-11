@@ -34,9 +34,9 @@ export const updateProjectSchema = z.object({
 
 export const addMemberSchema = z.object({
   user_id: z.number(),
-  project_role: z.enum(["INCHARGE", "MEMBER"], { message: "Project role must be INCHARGE or MEMBER" })
+  project_role: z.enum(["INCHARGE", "MEMBER"])
 });
 
 export const updateMemberRoleSchema = z.object({
-  project_role: z.enum(["INCHARGE", "MEMBER"], { message: "Project role must be INCHARGE or MEMBER" })
+  project_role: z.enum(["INCHARGE", "MEMBER"])
 });
