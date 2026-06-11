@@ -6,7 +6,8 @@ import {
   login,
   adminLogin,
   logout,
-  checkAuth
+  checkAuth,
+  getAllUsers
 } from "../controllers/auth.controller";
 
 const router = Router();
@@ -16,5 +17,6 @@ router.post("/login", login);
 router.post("/adminLogin", adminLogin);
 router.post("/logout", logout);
 router.get("/checkAuth", authenticate, checkAuth);
+router.get("/users", authenticate, getAllUsers);
 
 export default router;

@@ -1,34 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 
 export const DashboardPage: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
+  useEffect(() => {
+    if (!isLoading && user) {
+      if (user.role === 'Admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (user.role === 'Project Manager') {
+        navigate('/pm/dashboard', { replace: true });
+      } else {
+        navigate('/collaborator/dashboard', { replace: true });
+      }
+    }
+  }, [user, isLoading, navigate]);
 
   return (
-    <div className="dashboard-container">
-      <div className="glass-panel" style={{ padding: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h1>Dashboard</h1>
-          <div style={{ width: '150px' }}>
-            <Button onClick={handleLogout}>Log Out</Button>
-          </div>
-        </div>
-        
-        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px' }}>
-          <h2>Welcome, {user?.username || 'User'}!</h2>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-            You have successfully logged in. Your role is: <strong>{user?.role}</strong>
-          </p>
-        </div>
-      </div>
+    <div className="dashboard-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <h2>Loading Dashboard...</h2>
     </div>
   );
 };
