@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { getTasks, updateTask } from '../services/task.service';
 import type { Task } from '../services/task.service';
+import { getProjects } from '../services/project.service';
+import type { Project } from '../services/project.service';
 
 const statusColumns = ['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE'] as const;
 
@@ -18,6 +20,13 @@ const priorityColorMap: Record<string, string> = {
   Medium: '#FFC107',
   High: '#F44336',
   Critical: '#9C27B0',
+};
+
+const priorityWeight: Record<string, number> = {
+  Critical: 4,
+  High: 3,
+  Medium: 2,
+  Low: 1
 };
 
 const getPriorityColor = (priority?: string) => {
@@ -48,34 +57,41 @@ const formatDueDate = (dueDate: string | null) => {
 
 export const KanbanBoard: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
 
-  const loadTasks = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getTasks();
-      setTasks(data);
+      const [tasksData, projectsData] = await Promise.all([getTasks(), getProjects()]);
+      setTasks(tasksData);
+      setProjects(projectsData);
     } catch (err: any) {
-      setError(err?.message || 'Unable to load tasks');
+      setError(err?.message || 'Unable to load data');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadTasks();
+    loadData();
   }, []);
 
   const tasksByStatus = useMemo(() => {
+    const sortedFilteredTasks = tasks
+      .filter(task => selectedProjectId === 'all' || task.project_id === Number(selectedProjectId))
+      .sort((a, b) => (priorityWeight[b.priority || 'Medium'] || 0) - (priorityWeight[a.priority || 'Medium'] || 0));
+
     return statusColumns.reduce((acc, status) => {
-      acc[status] = tasks.filter((task) => task.status === status);
+      acc[status] = sortedFilteredTasks.filter((task) => task.status === status);
       return acc;
     }, {} as Record<StatusColumn, Task[]>);
-  }, [tasks]);
+  }, [tasks, selectedProjectId]);
 
   const handleStatusChange = async (task: Task) => {
     const nextStatus = getNextStatus(task.status);
@@ -166,12 +182,23 @@ export const KanbanBoard: React.FC = () => {
 
   return (
     <div className="dashboard-container" style={{ padding: '2rem' }}>
-      <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+      <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
         <div>
           <h1 style={{ margin: 0 }}>Kanban Board</h1>
-          <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)' }}>
+          <p style={{ margin: '0.5rem 0 1rem', color: 'var(--text-secondary)' }}>
             Track tasks across TODO, In Progress, Review, and Done.
           </p>
+          <select
+            className="input-field"
+            value={selectedProjectId}
+            onChange={(e) => setSelectedProjectId(e.target.value)}
+            style={{ width: '250px', padding: '0.5rem', background: 'var(--surface-color)', border: '1px solid var(--surface-border)' }}
+          >
+            <option value="all">All Projects</option>
+            {projects.map((p) => (
+              <option key={p.project_id} value={p.project_id}>{p.project_name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -190,7 +217,9 @@ export const KanbanBoard: React.FC = () => {
               key={status}
               className="glass-panel"
               style={{
-                minHeight: '500px',
+                height: 'calc(100vh - 280px)',
+                display: 'flex',
+                flexDirection: 'column',
                 padding: '1.5rem',
                 border: `1px solid rgba(255, 255, 255, 0.1)`,
                 background: tint,
@@ -223,7 +252,7 @@ export const KanbanBoard: React.FC = () => {
                 </span>
               </div>
 
-              <div style={{ borderTop: `2px solid ${accent}40`, paddingTop: '1rem' }}>
+              <div style={{ borderTop: `2px solid ${accent}40`, paddingTop: '1rem', flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
                 {loading ? (
                   <p style={{ color: 'var(--text-secondary)' }}>Loading tasks…</p>
                 ) : taskCount > 0 ? (

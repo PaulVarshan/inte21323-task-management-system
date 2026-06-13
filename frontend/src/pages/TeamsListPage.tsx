@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getProjects, getAllTeamMembers, removeMemberFromProject } from '../services/project.service';
-import type { Project, ProjectMember } from '../services/project.service';
+import { 
+  getProjects, 
+  getAllTeamMembers, 
+  removeMemberFromProject,
+  getAllUsers,
+  updateMemberRole,
+  addMemberToProject
+} from '../services/project.service';
+import type { Project, ProjectMember, User } from '../services/project.service';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
 
@@ -9,21 +16,26 @@ export const TeamsListPage: React.FC = () => {
   const { user: currentUser } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [members, setMembers] = useState<ProjectMember[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
   // Modal state
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [addingMember, setAddingMember] = useState(false);
+  const [selectedUserToAdd, setSelectedUserToAdd] = useState<string>('');
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [projData, membersData] = await Promise.all([
+      const [projData, membersData, usersData] = await Promise.all([
         getProjects(),
-        getAllTeamMembers()
+        getAllTeamMembers(),
+        getAllUsers()
       ]);
       setProjects(projData);
       setMembers(membersData);
+      setAllUsers(usersData);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch team data');
     } finally {
@@ -45,6 +57,48 @@ export const TeamsListPage: React.FC = () => {
     }
   };
 
+  const handleMakeIncharge = async (projectId: number, userId: number) => {
+    if (!window.confirm('Are you sure you want to make this member the INCHARGE?')) return;
+    try {
+      const currentIncharge = members.find(m => m.project_id === projectId && m.project_role === 'INCHARGE');
+      
+      await updateMemberRole(projectId, userId, 'INCHARGE');
+      
+      if (currentIncharge && currentIncharge.user_id !== userId) {
+        await updateMemberRole(projectId, currentIncharge.user_id, 'MEMBER');
+      }
+
+      setMembers(prev => prev.map(m => {
+        if (m.project_id === projectId) {
+          if (m.user_id === userId) return { ...m, project_role: 'INCHARGE' };
+          if (currentIncharge && m.user_id === currentIncharge.user_id) return { ...m, project_role: 'MEMBER' };
+        }
+        return m;
+      }));
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to update role');
+    }
+  };
+
+  const handleAddMember = async (projectId: number, userId: number) => {
+    try {
+      setAddingMember(true);
+      const newMember = await addMemberToProject(projectId, userId, 'MEMBER');
+      const userToAdd = allUsers.find(u => u.user_id === userId);
+      if (userToAdd) {
+        setMembers(prev => [...prev, {
+          ...newMember,
+          user: { user_id: userToAdd.user_id, username: userToAdd.username, email: userToAdd.email }
+        }]);
+      }
+      setSelectedUserToAdd('');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to add member');
+    } finally {
+      setAddingMember(false);
+    }
+  };
+
   const getProjectMembers = (projectId: number) => {
     return members.filter(m => m.project_id === projectId);
   };
@@ -56,11 +110,6 @@ export const TeamsListPage: React.FC = () => {
       <div className="glass-panel" style={{ padding: '2rem', position: 'relative' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <h1>Project Teams</h1>
-          {currentUser?.role !== 'Collaborator' && (
-            <Link to="new">
-              <Button>Add Member</Button>
-            </Link>
-          )}
         </div>
 
         {error && <div className="error-message">{error}</div>}
@@ -164,14 +213,24 @@ export const TeamsListPage: React.FC = () => {
                           </span>
                         </td>
                         <td style={{ padding: '1rem' }}>
-                          {currentUser?.role !== 'Collaborator' && (
-                            <button 
-                              onClick={() => handleRemove(member.project_id, member.user_id)}
-                              style={{ background: 'none', border: 'none', color: 'var(--error-color)', cursor: 'pointer', textDecoration: 'underline' }}
-                            >
-                              Remove
-                            </button>
-                          )}
+                          <select
+                            className="input-field"
+                            value=""
+                            onChange={(e) => {
+                              if (e.target.value === 'make_incharge') {
+                                handleMakeIncharge(member.project_id, member.user_id);
+                              } else if (e.target.value === 'remove') {
+                                handleRemove(member.project_id, member.user_id);
+                              }
+                            }}
+                            style={{ width: '180px', padding: '0.25rem 0.5rem', height: 'auto', background: 'var(--surface-color)', border: '1px solid var(--surface-border)' }}
+                          >
+                            <option value="" disabled>Actions</option>
+                            {member.project_role !== 'INCHARGE' && (
+                              <option value="make_incharge">Change role to INCHARGE</option>
+                            )}
+                            <option value="remove">Remove member</option>
+                          </select>
                         </td>
                       </tr>
                     ))
@@ -180,13 +239,31 @@ export const TeamsListPage: React.FC = () => {
               </table>
             </div>
 
-            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-              {currentUser?.role !== 'Collaborator' && (
-                <Link to="new">
-                  <Button>Add Member</Button>
-                </Link>
-              )}
-              <Button style={{ background: 'var(--surface-color)' }} onClick={() => setSelectedProject(null)}>Close</Button>
+            <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', width: '100%' }}>
+              <select
+                className="input-field"
+                value={selectedUserToAdd}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSelectedUserToAdd(val);
+                  if (val) {
+                    handleAddMember(selectedProject.project_id, Number(val));
+                  }
+                }}
+                style={{ flex: 1, padding: '0.75rem', height: 'auto', background: 'var(--primary-color)', color: '#fff', border: 'none', cursor: 'pointer' }}
+                disabled={addingMember}
+              >
+                <option value="" disabled>{addingMember ? 'Adding...' : 'Add member...'}</option>
+                {allUsers
+                  .filter(u => u.role === 'Collaborator' && !getProjectMembers(selectedProject.project_id).some(m => m.user_id === u.user_id))
+                  .map(u => (
+                    <option key={u.user_id} value={u.user_id} style={{ background: 'var(--surface-color)', color: 'var(--text-primary)' }}>
+                      {u.username} ({u.email})
+                    </option>
+                  ))
+                }
+              </select>
+              <Button style={{ flex: 1, background: 'var(--surface-color)' }} onClick={() => setSelectedProject(null)}>Close</Button>
             </div>
           </div>
         </div>

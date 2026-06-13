@@ -56,6 +56,19 @@ export const getAllTasks = async (userId: number, role: string) => {
     });
   }
 
+  if (role === "Collaborator") {
+    return prisma.task.findMany({
+      where: {
+        assignees: { some: { user_id: userId } }
+      },
+      include: {
+        project: { select: { project_name: true } },
+        assignees: { include: { user: { select: { user_id: true, username: true, email: true } } } },
+        creator: { select: { user_id: true, username: true, email: true } }
+      }
+    });
+  }
+
   return prisma.task.findMany({
     where: {
       OR: [

@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
-import { generateToken } from "../utils/jwt";
+import { generateAccessToken, generateRefreshToken } from "../utils/jwt";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -78,7 +78,7 @@ export const loginUser = async (
     throw new Error("Invalid credentials");
   }
 
-  const userRole = await prisma.userRole.findFirst({
+  const userRoles = await prisma.userRole.findMany({
     where: {
       user_id: user.user_id
     },
@@ -87,19 +87,29 @@ export const loginUser = async (
     }
   });
 
-  const roleName = userRole?.role.role_name || "Collaborator";
+  const roleNames = userRoles.map(ur => ur.role.role_name);
+  
+  let roleName = "";
+  if (allowedRoles.includes("Admin") && roleNames.includes("Admin")) roleName = "Admin";
+  else if (allowedRoles.includes("Project Manager") && roleNames.includes("Project Manager")) roleName = "Project Manager";
+  else if (allowedRoles.includes("Collaborator") && roleNames.includes("Collaborator")) roleName = "Collaborator";
 
-  if (!allowedRoles.includes(roleName)) {
+  if (!roleName) {
     throw new Error("Unauthorized role for this login portal");
   }
 
-  const token = generateToken(
+  const accessToken = generateAccessToken(
     user.user_id.toString(),
     roleName
   );
 
+  const refreshToken = generateRefreshToken(
+    user.user_id.toString()
+  );
+
   return {
-    token,
+    accessToken,
+    refreshToken,
     user: {
       user_id: user.user_id,
       username: user.username,
