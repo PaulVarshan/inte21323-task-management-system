@@ -89,7 +89,7 @@ export const ProjectDetailsPage: React.FC = () => {
   if (!project) return <div className="page-container">Project not found</div>;
 
   const isAdminOrCreator = currentUser?.role === 'Admin' || project.created_by === Number(currentUser?.user_id);
-  const availableUsers = users.filter(u => !members.some(m => m.user_id === u.user_id));
+  const availableUsers = users.filter(u => u.role === 'Collaborator' && !members.some(m => m.user_id === u.user_id));
 
   return (
     <div className="dashboard-container">

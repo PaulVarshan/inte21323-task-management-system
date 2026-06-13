@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { getProjectById, updateProject } from '../services/project.service';
 import { Button } from '../components/ui/Button';
+import { useAuth } from '../context/AuthContext';
 
 export const EditProjectPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [formData, setFormData] = useState({
     project_name: '',
@@ -18,11 +20,20 @@ export const EditProjectPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [hasPermission, setHasPermission] = useState(true);
 
   useEffect(() => {
     const fetchProject = async () => {
       try {
         const project = await getProjectById(Number(id));
+        
+        if (user?.role !== 'Admin' && project.creator?.user_id !== user?.user_id) {
+          setError('You do not have permission to edit this project.');
+          setHasPermission(false);
+          setLoading(false);
+          return;
+        }
+
         setFormData({
           project_name: project.project_name,
           description: project.description || '',
@@ -37,7 +48,7 @@ export const EditProjectPage: React.FC = () => {
       }
     };
     if (id) fetchProject();
-  }, [id]);
+  }, [id, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -78,6 +89,20 @@ export const EditProjectPage: React.FC = () => {
   };
 
   if (loading) return <div className="page-container">Loading...</div>;
+
+  if (!hasPermission) {
+    return (
+      <div className="page-container">
+        <div className="glass-panel" style={{ padding: '2rem', width: '100%', maxWidth: '600px', textAlign: 'center' }}>
+          <h2 style={{ marginBottom: '1rem', color: 'var(--error-color, #ff4d4f)' }}>Access Denied</h2>
+          <p style={{ marginBottom: '2rem' }}>{error}</p>
+          <Link to="../.." relative="path">
+            <Button type="button">Back to Projects</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-container">
@@ -154,7 +179,7 @@ export const EditProjectPage: React.FC = () => {
             <Button type="submit" style={{ flex: 2 }} disabled={saving}>
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
-            <Link to=".." relative="path" style={{ flex: 1 }}>
+            <Link to="../.." relative="path" style={{ flex: 1 }}>
               <Button type="button" style={{ width: '100%', background: 'var(--surface-color)' }}>Cancel</Button>
             </Link>
           </div>

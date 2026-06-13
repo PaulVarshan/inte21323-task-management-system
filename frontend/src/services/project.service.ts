@@ -97,6 +97,11 @@ export const removeMemberFromProject = async (id: number, userId: number) => {
   return response.data.data;
 };
 
+export const updateMemberRole = async (id: number, userId: number, project_role: string) => {
+  const response = await projectApi.put(`/projects/${id}/members/${userId}`, { project_role });
+  return response.data.data as ProjectMember;
+};
+
 // Users (for dropdown)
 export const getAllUsers = async () => {
   const response = await projectApi.get('/auth/users');

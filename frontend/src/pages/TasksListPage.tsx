@@ -214,13 +214,23 @@ export const TasksListPage: React.FC = () => {
                               }
                             }}
                             style={{ 
-                              fontSize: '0.8rem', 
-                              padding: '0.25rem 0.5rem', 
-                              background: 'rgba(255,255,255,0.1)',
+                              fontSize: '0.85rem', 
+                              padding: '0.4rem 0.75rem', 
+                              background: 'rgba(255,255,255,0.08)',
                               color: 'var(--text-primary)',
-                              border: '1px solid rgba(255,255,255,0.2)',
-                              borderRadius: '4px',
-                              cursor: 'pointer'
+                              border: '1px solid rgba(255,255,255,0.15)',
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              outline: 'none',
+                              transition: 'all 0.2s ease',
+                            }}
+                            onFocus={(e) => {
+                              (e.currentTarget as HTMLSelectElement).style.boxShadow = '0 0 12px rgba(59, 130, 246, 0.25)';
+                              (e.currentTarget as HTMLSelectElement).style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                            }}
+                            onBlur={(e) => {
+                              (e.currentTarget as HTMLSelectElement).style.boxShadow = 'none';
+                              (e.currentTarget as HTMLSelectElement).style.borderColor = 'rgba(255,255,255,0.15)';
                             }}
                           >
                             <option style={{color: 'black'}} value="TODO">TODO</option>
@@ -233,10 +243,29 @@ export const TasksListPage: React.FC = () => {
                           {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'N/A'}
                         </td>
                         <td style={{ padding: '1rem' }}>
-                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                             {currentUser?.role !== 'Collaborator' && (
                               <Link to={`edit/${task.task_id}`}>
-                                <button style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', textDecoration: 'underline' }}>
+                                <button style={{
+                                  background: 'rgba(59,130,246,0.15)',
+                                  border: '1px solid rgba(59,130,246,0.3)',
+                                  color: '#3b82f6',
+                                  cursor: 'pointer',
+                                  textDecoration: 'none',
+                                  borderRadius: '999px',
+                                  padding: '0.3rem 0.75rem',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 500,
+                                  transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = 'rgba(59,130,246,0.25)';
+                                  e.currentTarget.style.borderColor = 'rgba(59,130,246,0.5)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = 'rgba(59,130,246,0.15)';
+                                  e.currentTarget.style.borderColor = 'rgba(59,130,246,0.3)';
+                                }}>
                                   Edit
                                 </button>
                               </Link>
@@ -244,7 +273,26 @@ export const TasksListPage: React.FC = () => {
                             {currentUser?.role !== 'Collaborator' && (
                               <button 
                                 onClick={() => handleDelete(task.task_id)}
-                                style={{ background: 'none', border: 'none', color: 'var(--error-color)', cursor: 'pointer', textDecoration: 'underline' }}
+                                style={{
+                                  background: 'rgba(239,68,68,0.15)',
+                                  border: '1px solid rgba(239,68,68,0.3)',
+                                  color: '#ef4444',
+                                  cursor: 'pointer',
+                                  textDecoration: 'none',
+                                  borderRadius: '999px',
+                                  padding: '0.3rem 0.75rem',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 500,
+                                  transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = 'rgba(239,68,68,0.25)';
+                                  e.currentTarget.style.borderColor = 'rgba(239,68,68,0.5)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = 'rgba(239,68,68,0.15)';
+                                  e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)';
+                                }}
                               >
                                 Delete
                               </button>

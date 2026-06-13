@@ -4,184 +4,131 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  user_id       Int    @id @default(autoincrement())
-  username      String
-  email         String @unique
-  password_hash String
-
-  is_first_login Boolean @default(true)
-  is_active      Boolean @default(true)
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  user_roles    UserRole[]
-  notifications Notification[]
-
-  created_projects Project[] @relation("ProjectCreator")
-
-  project_teams ProjectTeam[]
-
-  created_tasks Task[] @relation("TaskCreator")
-
-  assigned_tasks TaskAssigned[]
-
-  uploaded_files Attachment[]
-
-  comments Comment[]
+  user_id             Int            @id @default(autoincrement())
+  email               String         @unique
+  username            String
+  created_at          DateTime       @default(now())
+  is_active           Boolean        @default(true)
+  is_first_login      Boolean        @default(true)
+  password_hash       String
+  updated_at          DateTime       @updatedAt
+  reset_token         String?
+  reset_token_expires DateTime?
+  uploaded_files      Attachment[]
+  comments            Comment[]
+  notifications       Notification[]
+  created_projects    Project[]      @relation("ProjectCreator")
+  project_teams       ProjectTeam[]
+  created_tasks       Task[]         @relation("TaskCreator")
+  assigned_tasks      TaskAssigned[]
+  user_roles          UserRole[]
 }
 
 model Role {
-  role_id   Int    @id @default(autoincrement())
-  role_name String @unique
-
+  role_id    Int        @id @default(autoincrement())
+  role_name  String     @unique
   user_roles UserRole[]
 }
 
 model UserRole {
-  user_role_id Int @id @default(autoincrement())
-
-  user_id Int
-  role_id Int
-
-  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  role Role @relation(fields: [role_id], references: [role_id], onDelete: Cascade)
+  user_role_id Int  @id @default(autoincrement())
+  user_id      Int
+  role_id      Int
+  role         Role @relation(fields: [role_id], references: [role_id], onDelete: Cascade)
+  user         User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([user_id, role_id])
 }
 
 model Notification {
-  notification_id Int @id @default(autoincrement())
-
-  user_id Int
-
-  title   String
-  message String
-
+  notification_id   Int      @id @default(autoincrement())
+  user_id           Int
+  title             String
+  message           String
   notification_type String
-
-  is_read Boolean @default(false)
-
-  created_at DateTime @default(now())
-
-  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  is_read           Boolean  @default(false)
+  created_at        DateTime @default(now())
+  user              User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 }
 
 model Project {
-  project_id Int @id @default(autoincrement())
-
-  project_name String
+  project_id   Int           @id @default(autoincrement())
   description  String?
-
-  start_date DateTime
-  end_date   DateTime?
-
-  status String
-
-  created_by Int
-
-  created_at DateTime @default(now())
-
-  creator User @relation("ProjectCreator", fields: [created_by], references: [user_id])
-
+  created_by   Int
+  created_at   DateTime      @default(now())
+  end_date     DateTime?
+  project_name String
+  start_date   DateTime
+  status       String
+  creator      User          @relation("ProjectCreator", fields: [created_by], references: [user_id])
   team_members ProjectTeam[]
-
-  tasks Task[]
+  tasks        Task[]
 }
 
 model ProjectTeam {
-  project_team_id Int @id @default(autoincrement())
-
-  project_id Int
-  user_id    Int
-
-  project_role String
-
-  joined_at DateTime @default(now())
-
-  project Project @relation(fields: [project_id], references: [project_id], onDelete: Cascade)
-
-  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  project_team_id Int      @id @default(autoincrement())
+  project_id      Int
+  user_id         Int
+  project_role    String
+  joined_at       DateTime @default(now())
+  project         Project  @relation(fields: [project_id], references: [project_id], onDelete: Cascade)
+  user            User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([project_id, user_id])
 }
 
 model Task {
-  task_id Int @id @default(autoincrement())
-
-  project_id Int
-
+  task_id     Int            @id @default(autoincrement())
   title       String
   description String?
-
-  priority String
-  status   String
-
-  due_date DateTime?
-
-  created_by Int
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  project Project @relation(fields: [project_id], references: [project_id], onDelete: Cascade)
-
-  creator User @relation("TaskCreator", fields: [created_by], references: [user_id])
-
-  assignees TaskAssigned[]
-
+  status      String
+  priority    String
+  due_date    DateTime?
+  project_id  Int
+  created_by  Int
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
   attachments Attachment[]
-
-  comments Comment[]
+  comments    Comment[]
+  creator     User           @relation("TaskCreator", fields: [created_by], references: [user_id])
+  project     Project        @relation(fields: [project_id], references: [project_id], onDelete: Cascade)
+  assignees   TaskAssigned[]
 }
 
 model TaskAssigned {
-  task_assigned_id Int @id @default(autoincrement())
-
-  task_id Int
-  user_id Int
-
-  assigned_at DateTime @default(now())
-
-  task Task @relation(fields: [task_id], references: [task_id], onDelete: Cascade)
-
-  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  task_assigned_id Int      @id @default(autoincrement())
+  task_id          Int
+  user_id          Int
+  assigned_at      DateTime @default(now())
+  task             Task     @relation(fields: [task_id], references: [task_id], onDelete: Cascade)
+  user             User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([task_id, user_id])
 }
 
 model Attachment {
-  attachment_id Int @id @default(autoincrement())
-
-  task_id             Int
+  attachment_id       Int      @id @default(autoincrement())
+  file_name           String
   uploaded_by_user_id Int
-
-  file_name String
-  file_url  String
-
-  uploaded_at DateTime @default(now())
-
-  task Task @relation(fields: [task_id], references: [task_id], onDelete: Cascade)
-
-  user User @relation(fields: [uploaded_by_user_id], references: [user_id], onDelete: Cascade)
+  task_id             Int
+  uploaded_at         DateTime @default(now())
+  file_url            String
+  task                Task     @relation(fields: [task_id], references: [task_id], onDelete: Cascade)
+  user                User     @relation(fields: [uploaded_by_user_id], references: [user_id], onDelete: Cascade)
 }
 
 model Comment {
-  comment_id Int @id @default(autoincrement())
-
-  task_id Int
-  user_id Int
-
+  comment_id   Int      @id @default(autoincrement())
+  user_id      Int
+  task_id      Int
+  created_at   DateTime @default(now())
   comment_text String
-
-  created_at DateTime @default(now())
-
-  task Task @relation(fields: [task_id], references: [task_id], onDelete: Cascade)
-
-  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  task         Task     @relation(fields: [task_id], references: [task_id], onDelete: Cascade)
+  user         User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 }

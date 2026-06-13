@@ -27,6 +27,7 @@ import { ProjectDetailsPage } from './pages/ProjectDetailsPage';
 import { TasksListPage } from './pages/TasksListPage';
 import { CreateTaskPage } from './pages/CreateTaskPage';
 import { EditTaskPage } from './pages/EditTaskPage';
+import { KanbanBoard } from './pages/KanbanBoard';
 import { TeamsListPage } from './pages/TeamsListPage';
 import { AddTeamMemberPage } from './pages/AddTeamMemberPage';
 
@@ -56,7 +57,8 @@ function App() {
           <Route path="tasks" element={<TasksListPage />} />
           <Route path="tasks/new" element={<CreateTaskPage />} />
           <Route path="tasks/edit/:id" element={<EditTaskPage />} />
-          
+          <Route path="tasks/kanban" element={<KanbanBoard />} />
+
           <Route path="reports" element={<ComingSoonPage title="System Reports" />} />
           <Route path="notifications" element={<ComingSoonPage title="Notifications" />} />
           <Route path="" element={<Navigate to="dashboard" replace />} />
@@ -77,6 +79,8 @@ function App() {
           <Route path="tasks" element={<TasksListPage />} />
           <Route path="tasks/new" element={<CreateTaskPage />} />
           <Route path="tasks/edit/:id" element={<EditTaskPage />} />
+          <Route path="tasks/kanban" element={<KanbanBoard />} />
+
           <Route path="reports" element={<ComingSoonPage title="Project Reports" />} />
           <Route path="notifications" element={<ComingSoonPage title="Notifications" />} />
           <Route path="" element={<Navigate to="dashboard" replace />} />
@@ -88,6 +92,7 @@ function App() {
           
           <Route path="tasks" element={<TasksListPage />} />
           <Route path="tasks/edit/:id" element={<EditTaskPage />} />
+          <Route path="tasks/kanban" element={<KanbanBoard />} />
           
           <Route path="projects" element={<ProjectsListPage />} />
           <Route path="projects/:id" element={<ProjectDetailsPage />} />

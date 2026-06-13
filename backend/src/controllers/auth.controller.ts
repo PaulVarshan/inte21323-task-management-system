@@ -32,8 +32,15 @@ export const login = async (req: Request, res: Response) => {
     const allowedRoles = ["Collaborator", "Project Manager"];
     const result = await loginUser(email, password, allowedRoles);
     
-    // Set HttpOnly cookie
-    res.cookie("token", result.token, {
+    // Set HttpOnly cookies
+    res.cookie("accessToken", result.accessToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+    res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
@@ -53,8 +60,15 @@ export const adminLogin = async (req: Request, res: Response) => {
     const allowedRoles = ["Admin"];
     const result = await loginUser(email, password, allowedRoles);
     
-    // Set HttpOnly cookie
-    res.cookie("token", result.token, {
+    // Set HttpOnly cookies
+    res.cookie("accessToken", result.accessToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+    res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
@@ -63,12 +77,17 @@ export const adminLogin = async (req: Request, res: Response) => {
 
     res.json({ success: true, user: result.user });
   } catch (error: any) {
-    res.status(401).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
 export const logout = async (req: Request, res: Response) => {
-  res.clearCookie("token", {
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+  });
+  res.clearCookie("refreshToken", {
     httpOnly: true,
     sameSite: "strict",
     secure: process.env.NODE_ENV === "production",
@@ -77,12 +96,72 @@ export const logout = async (req: Request, res: Response) => {
 };
 
 export const checkAuth = async (req: any, res: Response) => {
-  // If the request makes it here, the auth.middleware verified the cookie
-  res.json({ success: true, user: req.user });
+  try {
+    const userId = parseInt(req.user.userId);
+    const user = await prisma.user.findUnique({
+      where: { user_id: userId }
+    });
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: "User not found" });
+    }
+
+    res.json({ 
+      success: true, 
+      user: {
+        user_id: user.user_id,
+        username: user.username,
+        email: user.email,
+        role: req.user.role
+      } 
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
+import { verifyRefreshToken, generateAccessToken } from "../utils/jwt";
 import { PrismaClient } from "../generated/prisma/client";
+
 const prisma = new PrismaClient();
+
+export const refresh = async (req: Request, res: Response) => {
+  try {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ success: false, message: "No refresh token provided" });
+    }
+
+    const decoded: any = verifyRefreshToken(refreshToken);
+    const userId = parseInt(decoded.userId);
+
+    const user = await prisma.user.findUnique({
+      where: { user_id: userId },
+      select: { user_id: true, user_roles: { select: { role: { select: { role_name: true } } } } }
+    });
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: "User not found" });
+    }
+
+    const roleNames = user.user_roles?.map(ur => ur.role?.role_name) || [];
+    let roleName = "Collaborator";
+    if (roleNames.includes("Admin")) roleName = "Admin";
+    else if (roleNames.includes("Project Manager")) roleName = "Project Manager";
+    const newAccessToken = generateAccessToken(userId.toString(), roleName);
+
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+    res.json({ success: true, message: "Token refreshed successfully" });
+  } catch (error: any) {
+    res.status(401).json({ success: false, message: "Invalid refresh token" });
+  }
+};
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
