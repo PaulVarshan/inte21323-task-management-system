@@ -6,6 +6,7 @@ import type { Task } from '../services/task.service';
 import type { Project } from '../services/project.service';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
+import { TaskDetailsModal } from '../components/TaskDetailsModal';
 
 export const TasksListPage: React.FC = () => {
   const { user: currentUser } = useAuth();
@@ -318,79 +319,14 @@ export const TasksListPage: React.FC = () => {
         </div>
       )}
 
-      {/* Level 2 Modal: Task Assignees */}
+      {/* Level 2 Modal: Task Details (Comments & Attachments) */}
       {selectedTask && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          backdropFilter: 'blur(2px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1100
-        }}>
-          <div className="glass-panel" style={{ 
-            width: '100%', 
-            maxWidth: '500px', 
-            padding: '2rem',
-            position: 'relative'
-          }}>
-            <button 
-              onClick={() => setSelectedTask(null)}
-              style={{
-                position: 'absolute',
-                top: '1rem', right: '1.5rem',
-                background: 'none', border: 'none',
-                color: 'var(--text-secondary)',
-                fontSize: '1.5rem',
-                cursor: 'pointer'
-              }}
-            >&times;</button>
-            
-            <h2 style={{ marginBottom: '1rem' }}>Assignees</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-              For Task: <strong>{selectedTask.title}</strong>
-            </p>
-            
-            {(!selectedTask.assignees || selectedTask.assignees.length === 0) ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
-                No members assigned to this task.
-              </div>
-            ) : (
-              <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {selectedTask.assignees.map(assignee => (
-                  <li key={assignee.task_assigned_id} style={{ 
-                    padding: '1rem', 
-                    background: 'rgba(255,255,255,0.05)', 
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem'
-                  }}>
-                    <div style={{ 
-                      width: '40px', height: '40px', 
-                      borderRadius: '50%', 
-                      background: 'var(--primary-color)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontWeight: 'bold', fontSize: '1.2rem'
-                    }}>
-                      {assignee.user.username.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 500 }}>{assignee.user.username}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{assignee.user.email}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
-              <Button style={{ background: 'var(--surface-color)' }} onClick={() => setSelectedTask(null)}>Close</Button>
-            </div>
-          </div>
-        </div>
+        <TaskDetailsModal
+          taskId={selectedTask.task_id}
+          isOpen={!!selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onTaskUpdated={fetchData}
+        />
       )}
     </div>
   );

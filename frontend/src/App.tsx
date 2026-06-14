@@ -22,6 +22,7 @@ import { ProjectsListPage } from './pages/ProjectsListPage';
 import { CreateProjectPage } from './pages/CreateProjectPage';
 import { EditProjectPage } from './pages/EditProjectPage';
 import { ProjectDetailsPage } from './pages/ProjectDetailsPage';
+import { PMDashboard } from './pages/PMDashboard';
 
 // Tasks and Teams Pages
 import { TasksListPage } from './pages/TasksListPage';
@@ -46,7 +47,7 @@ function App() {
         
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route path="dashboard" element={<ComingSoonPage title="Admin Dashboard" />} />
+          <Route path="dashboard" element={<PMDashboard />} />
           <Route path="users" element={<EmptyTablePage title="User Management" columns={['Name', 'Email', 'Role', 'Status', 'Actions']} actionLabel="Create User" />} />
           
           <Route path="projects" element={<ProjectsListPage />} />
@@ -66,7 +67,7 @@ function App() {
 
         {/* Project Manager Routes */}
         <Route path="/pm" element={<PMLayout />}>
-          <Route path="dashboard" element={<ComingSoonPage title="Project Manager Dashboard" />} />
+          <Route path="dashboard" element={<PMDashboard />} />
           
           <Route path="projects" element={<ProjectsListPage />} />
           <Route path="projects/new" element={<CreateProjectPage />} />
