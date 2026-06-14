@@ -5,6 +5,11 @@ import { createTask } from '../services/task.service';
 import type { Project, ProjectMember } from '../services/project.service';
 import { Button } from '../components/ui/Button';
 
+const getLocalDateString = () => {
+  const t = new Date();
+  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+};
+
 export const CreateTaskPage: React.FC = () => {
   const navigate = useNavigate();
   
@@ -64,6 +69,14 @@ export const CreateTaskPage: React.FC = () => {
     if (!formData.project_id) {
       setError('Please select a project');
       return;
+    }
+
+    if (formData.due_date) {
+      const today = getLocalDateString();
+      if (formData.due_date < today) {
+        setError('Due date cannot be in the past');
+        return;
+      }
     }
 
     try {
@@ -170,6 +183,7 @@ export const CreateTaskPage: React.FC = () => {
             <input 
               type="date" 
               className="input-field" 
+              min={getLocalDateString()}
               value={formData.due_date} 
               onChange={e => setFormData({...formData, due_date: e.target.value})}
             />

@@ -54,7 +54,7 @@ export const EditTaskPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     try {
       setSubmitting(true);
       await updateTask(Number(id), {

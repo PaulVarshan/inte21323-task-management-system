@@ -3,6 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { createProject } from '../services/project.service';
 import { Button } from '../components/ui/Button';
 
+const getLocalDateString = () => {
+  const t = new Date();
+  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+};
+
 export const CreateProjectPage: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -30,6 +35,14 @@ export const CreateProjectPage: React.FC = () => {
       setError('Start date is required');
       return;
     }
+    if (formData.end_date) {
+      const today = getLocalDateString();
+      if (formData.end_date < today) {
+        setError('End date cannot be in the past');
+        return;
+      }
+    }
+
     if (formData.end_date && new Date(formData.end_date) < new Date(formData.start_date)) {
       setError('End date cannot be before start date');
       return;
@@ -101,6 +114,7 @@ export const CreateProjectPage: React.FC = () => {
                 type="date" 
                 name="end_date" 
                 className="input-field" 
+                min={getLocalDateString()}
                 value={formData.end_date} 
                 onChange={handleChange} 
               />
