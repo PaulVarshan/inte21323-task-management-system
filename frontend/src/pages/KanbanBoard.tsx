@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { getTasks, updateTask } from '../services/task.service';
+import { getTasks } from '../services/task.service';
 import type { Task } from '../services/task.service';
 import { getProjects } from '../services/project.service';
 import type { Project } from '../services/project.service';
+import { TaskDetailsModal } from '../components/TaskDetailsModal';
 
 const statusColumns = ['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE'] as const;
 
@@ -34,20 +35,7 @@ const getPriorityColor = (priority?: string) => {
   return priorityColorMap[priority] || '#999';
 };
 
-const getNextStatus = (status: string): StatusColumn | null => {
-  switch (status) {
-    case 'TODO':
-      return 'IN_PROGRESS';
-    case 'IN_PROGRESS':
-      return 'REVIEW';
-    case 'REVIEW':
-      return 'DONE';
-    case 'DONE':
-      return 'TODO';
-    default:
-      return 'TODO';
-  }
-};
+
 
 const formatDueDate = (dueDate: string | null) => {
   if (!dueDate) return 'No due date';
@@ -62,7 +50,6 @@ export const KanbanBoard: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [updating, setUpdating] = useState(false);
 
   const loadData = async () => {
     try {
@@ -93,21 +80,7 @@ export const KanbanBoard: React.FC = () => {
     }, {} as Record<StatusColumn, Task[]>);
   }, [tasks, selectedProjectId]);
 
-  const handleStatusChange = async (task: Task) => {
-    const nextStatus = getNextStatus(task.status);
-    if (!nextStatus) return;
 
-    try {
-      setUpdating(true);
-      const updatedTask = await updateTask(task.task_id, { status: nextStatus });
-      setTasks((current) => current.map((item) => (item.task_id === updatedTask.task_id ? updatedTask : item)));
-      setSelectedTask(updatedTask);
-    } catch (err: any) {
-      setError(err?.message || 'Unable to update task');
-    } finally {
-      setUpdating(false);
-    }
-  };
 
   const buildAssigneesLabel = (task: Task) => {
     return task.assignees?.map((assigned) => assigned.user?.username).filter(Boolean).join(', ') || 'Unassigned';
@@ -269,166 +242,12 @@ export const KanbanBoard: React.FC = () => {
       </div>
 
       {selectedTask && (
-        <div
-          className="kanban-modal"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 20,
-            backgroundColor: 'rgba(0, 0, 0, 0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1.5rem',
-            backdropFilter: 'blur(4px)',
-          }}
-          onClick={() => setSelectedTask(null)}
-        >
-          <div
-            className="glass-panel"
-            style={{
-              maxWidth: '720px',
-              width: '100%',
-              padding: '2rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              background: 'rgba(15, 15, 25, 0.98)',
-              backdropFilter: 'blur(20px)',
-              position: 'relative',
-              borderRadius: '1rem',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-            }}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setSelectedTask(null)}
-              style={{
-                position: 'absolute',
-                top: '1.5rem',
-                right: '1.5rem',
-                border: 'none',
-                background: 'transparent',
-                color: 'var(--text-secondary)',
-                cursor: 'pointer',
-                fontSize: '1.75rem',
-                transition: 'color 0.2s ease',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
-            >
-              ×
-            </button>
-
-            <h2 style={{ marginTop: 0, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-              {selectedTask.title}
-            </h2>
-            <p style={{ margin: '0 0 1.5rem', color: 'var(--text-secondary)' }}>
-              Project: <span style={{ color: 'var(--text-primary)' }}>{selectedTask.project?.project_name || 'No project'}</span>
-            </p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', margin: '1.5rem 0' }}>
-              <div>
-                <p style={{ margin: '0 0 0.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>Priority</p>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '999px',
-                    color: '#fff',
-                    backgroundColor: getPriorityColor(selectedTask.priority),
-                    boxShadow: `0 4px 12px ${getPriorityColor(selectedTask.priority)}40`,
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  {selectedTask.priority || 'Medium'}
-                </span>
-              </div>
-              <div>
-                <p style={{ margin: '0 0 0.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>Status</p>
-                <span style={{ color: 'var(--text-secondary)' }}>{selectedTask.status.replace('_', ' ')}</span>
-              </div>
-              <div>
-                <p style={{ margin: '0 0 0.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>Due Date</p>
-                <p style={{ margin: 0, color: 'var(--text-secondary)' }}>{formatDueDate(selectedTask.due_date)}</p>
-              </div>
-              <div>
-                <p style={{ margin: '0 0 0.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>Assignees</p>
-                <p style={{ margin: 0, color: 'var(--text-secondary)' }}>{buildAssigneesLabel(selectedTask)}</p>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '2rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-              <p style={{ margin: '0 0 0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>Description</p>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                {selectedTask.description || 'No description available.'}
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                onClick={() => setSelectedTask(null)}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '999px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  backgroundColor: 'transparent',
-                  color: 'var(--text-primary)',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                }}
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                onClick={() => handleStatusChange(selectedTask)}
-                disabled={updating}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '999px',
-                  border: 'none',
-                  backgroundColor: 'var(--primary-color)',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  minWidth: '200px',
-                  transition: 'all 0.2s ease',
-                  opacity: updating ? 0.7 : 1,
-                }}
-                onMouseEnter={(e) => {
-                  if (!updating) {
-                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.3)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                {updating
-                  ? 'Updating…'
-                  : selectedTask.status === 'DONE'
-                  ? 'Reopen to TODO'
-                  : `Move to ${getNextStatus(selectedTask.status)?.replace('_', ' ')}`}
-              </button>
-            </div>
-          </div>
-        </div>
+        <TaskDetailsModal
+          taskId={selectedTask.task_id}
+          isOpen={!!selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onTaskUpdated={loadData}
+        />
       )}
     </div>
   );

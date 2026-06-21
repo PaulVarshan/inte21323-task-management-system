@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { 
   getProjects, 
   getAllTeamMembers, 
@@ -10,10 +9,8 @@ import {
 } from '../services/project.service';
 import type { Project, ProjectMember, User } from '../services/project.service';
 import { Button } from '../components/ui/Button';
-import { useAuth } from '../context/AuthContext';
 
 export const TeamsListPage: React.FC = () => {
-  const { user: currentUser } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);

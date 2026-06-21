@@ -16,20 +16,32 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     
-    // If the error is 401 and we haven't retried yet, and it's not the /login or /refresh endpoints
+    // Check if the request is for an authentication endpoint
+    const isAuthEndpoint = originalRequest.url && (
+      originalRequest.url.endsWith('/login') ||
+      originalRequest.url.endsWith('/adminLogin') ||
+      originalRequest.url.endsWith('/refresh')
+    );
+
+    // If the error is 401 and we haven't retried yet, and it's not an auth endpoint
     if (
       error.response?.status === 401 && 
       !originalRequest._retry && 
-      originalRequest.url !== '/login' && 
-      originalRequest.url !== '/refresh'
+      !isAuthEndpoint
     ) {
       originalRequest._retry = true;
       try {
         await axios.post(`${API_URL}/refresh`, {}, { withCredentials: true });
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed (e.g. refresh token expired), redirect to login
-        window.location.href = '/login';
+        // Refresh failed (e.g. refresh token expired)
+        // Only redirect to login if we are not already on a public route to prevent redirect loops
+        const publicRoutes = ['/', '/login', '/adminLogin', '/register', '/forgot-password'];
+        const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+        
+        if (!publicRoutes.includes(currentPath)) {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }
