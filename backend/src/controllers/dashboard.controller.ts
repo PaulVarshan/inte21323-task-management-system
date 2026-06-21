@@ -5,24 +5,58 @@ interface AuthRequest extends Request {
   user?: any;
 }
 
+const getFilters = (role: string, userId: number) => {
+  let projectFilter: any = {};
+  let taskFilter: any = {};
+
+  if (role === "Admin") {
+    projectFilter = {};
+    taskFilter = {};
+  } else if (role === "Project Manager") {
+    projectFilter = {
+      OR: [
+        { created_by: userId },
+        { team_members: { some: { user_id: userId } } }
+      ]
+    };
+    taskFilter = {
+      project: projectFilter
+    };
+  } else if (role === "Collaborator") {
+    projectFilter = {
+      team_members: { some: { user_id: userId } }
+    };
+    taskFilter = {
+      assignees: { some: { user_id: userId } }
+    };
+  }
+
+  return { projectFilter, taskFilter };
+};
+
 export const getOverview = async (req: AuthRequest, res: Response) => {
   try {
+    const userId = parseInt(req.user.userId as string);
+    const role = req.user.role as string;
+    const { projectFilter, taskFilter } = getFilters(role, userId);
+
     const now = new Date();
 
     const [totalProjects, activeProjects, totalTasks, completedTasks, inProgressTasks, overdueTasks] = await Promise.all([
-      prisma.project.count(),
+      prisma.project.count({ where: projectFilter }),
       prisma.project.count({
-        where: { NOT: { status: "COMPLETED" } }
+        where: { ...projectFilter, NOT: { status: "COMPLETED" } }
       }),
-      prisma.task.count(),
+      prisma.task.count({ where: taskFilter }),
       prisma.task.count({
-        where: { status: "DONE" }
+        where: { ...taskFilter, status: "DONE" }
       }),
       prisma.task.count({
-        where: { status: { in: ["IN_PROGRESS", "REVIEW"] } }
+        where: { ...taskFilter, status: { in: ["IN_PROGRESS", "REVIEW"] } }
       }),
       prisma.task.count({
         where: {
+          ...taskFilter,
           NOT: { status: "DONE" },
           due_date: { lt: now }
         }
@@ -48,11 +82,17 @@ export const getOverview = async (req: AuthRequest, res: Response) => {
 
 export const getProjectProgress = async (req: AuthRequest, res: Response) => {
   try {
+    const userId = parseInt(req.user.userId as string);
+    const role = req.user.role as string;
+    const { projectFilter } = getFilters(role, userId);
+
     const projects = await prisma.project.findMany({
+      where: projectFilter,
       select: {
         project_id: true,
         project_name: true,
         tasks: {
+          where: role === "Collaborator" ? { assignees: { some: { user_id: userId } } } : undefined,
           select: {
             status: true
           }
@@ -85,8 +125,13 @@ export const getProjectProgress = async (req: AuthRequest, res: Response) => {
 
 export const getTaskStatus = async (req: AuthRequest, res: Response) => {
   try {
+    const userId = parseInt(req.user.userId as string);
+    const role = req.user.role as string;
+    const { taskFilter } = getFilters(role, userId);
+
     const statusCounts = await prisma.task.groupBy({
       by: ["status"],
+      where: taskFilter,
       _count: {
         status: true
       }
@@ -117,9 +162,14 @@ export const getTaskStatus = async (req: AuthRequest, res: Response) => {
 
 export const getOverdueTasks = async (req: AuthRequest, res: Response) => {
   try {
+    const userId = parseInt(req.user.userId as string);
+    const role = req.user.role as string;
+    const { taskFilter } = getFilters(role, userId);
+
     const now = new Date();
     const overdue = await prisma.task.findMany({
       where: {
+        ...taskFilter,
         NOT: { status: "DONE" },
         due_date: { lt: now }
       },
@@ -152,6 +202,10 @@ export const getOverdueTasks = async (req: AuthRequest, res: Response) => {
 
 export const getUpcomingDeadlines = async (req: AuthRequest, res: Response) => {
   try {
+    const userId = parseInt(req.user.userId as string);
+    const role = req.user.role as string;
+    const { taskFilter } = getFilters(role, userId);
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -168,6 +222,7 @@ export const getUpcomingDeadlines = async (req: AuthRequest, res: Response) => {
 
     const upcomingTasks = await prisma.task.findMany({
       where: {
+        ...taskFilter,
         NOT: { status: "DONE" },
         due_date: { gte: today, lte: in7Days }
       },
@@ -214,9 +269,13 @@ export const getUpcomingDeadlines = async (req: AuthRequest, res: Response) => {
 
 export const getTeamWorkload = async (req: AuthRequest, res: Response) => {
   try {
+    const userId = parseInt(req.user.userId as string);
+    const role = req.user.role as string;
+
     const users = await prisma.user.findMany({
       where: {
         is_active: true,
+        ...(role === "Collaborator" ? { user_id: userId } : {}),
         user_roles: {
           some: {
             role: {
@@ -263,7 +322,12 @@ export const getTeamWorkload = async (req: AuthRequest, res: Response) => {
 
 export const getRecentTasks = async (req: AuthRequest, res: Response) => {
   try {
+    const userId = parseInt(req.user.userId as string);
+    const role = req.user.role as string;
+    const { taskFilter } = getFilters(role, userId);
+
     const recent = await prisma.task.findMany({
+      where: taskFilter,
       orderBy: { updated_at: "desc" },
       take: 10,
       include: {

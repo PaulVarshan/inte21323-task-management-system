@@ -3,6 +3,7 @@ import * as attachmentService from "../services/attachment.service";
 
 interface AuthRequest extends Request {
   user?: any;
+  file?: Express.Multer.File;
 }
 
 export const uploadAttachment = async (req: AuthRequest, res: Response) => {

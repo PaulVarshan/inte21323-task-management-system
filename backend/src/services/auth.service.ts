@@ -1,12 +1,6 @@
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "../generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
+import prisma from "../config/prisma";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt";
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
 
 export const registerUser = async (
     username: string,
