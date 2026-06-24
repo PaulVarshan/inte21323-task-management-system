@@ -1,4 +1,5 @@
 import prisma from "../config/prisma";
+import { createNotification } from "./notification.service";
 
 export const createComment = async (userId: number, taskId: number, commentText: string) => {
   if (!commentText.trim()) {
@@ -7,13 +8,14 @@ export const createComment = async (userId: number, taskId: number, commentText:
 
   // Verify task exists
   const task = await prisma.task.findUnique({
-    where: { task_id: taskId }
+    where: { task_id: taskId },
+    include: { assignees: true }
   });
   if (!task) {
     throw new Error("Task not found");
   }
 
-  return prisma.comment.create({
+  const comment = await prisma.comment.create({
     data: {
       user_id: userId,
       task_id: taskId,
@@ -29,6 +31,24 @@ export const createComment = async (userId: number, taskId: number, commentText:
       }
     }
   });
+
+  // Notify task creator and assignees about the new comment
+  const notifyUsers = new Set<number>();
+  if (task.created_by !== userId) notifyUsers.add(task.created_by);
+  task.assignees.forEach(a => {
+    if (a.user_id !== userId) notifyUsers.add(a.user_id);
+  });
+
+  for (const uid of notifyUsers) {
+    await createNotification(
+      uid,
+      "New Comment",
+      `A new comment was added to task "${task.title}"`,
+      "TASK_COMMENT"
+    );
+  }
+
+  return comment;
 };
 
 export const getTaskComments = async (taskId: number) => {

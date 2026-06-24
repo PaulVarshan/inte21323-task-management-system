@@ -1,11 +1,12 @@
 import prisma from "../config/prisma";
+import { createNotification } from "./notification.service";
 
 // =======================
 // PROJECT CRUD OPERATIONS
 // =======================
 
 export const createProject = async (data: any, userId: number) => {
-  return prisma.project.create({
+  const project = await prisma.project.create({
     data: {
       project_name: data.project_name,
       description: data.description,
@@ -15,6 +16,25 @@ export const createProject = async (data: any, userId: number) => {
       created_by: userId
     }
   });
+
+  // Notify Admins
+  const admins = await prisma.userRole.findMany({
+    where: { role: { role_name: "Admin" } },
+    select: { user_id: true }
+  });
+
+  for (const admin of admins) {
+    if (admin.user_id !== userId) {
+      await createNotification(
+        admin.user_id,
+        "New Project Created",
+        `Project "${project.project_name}" has been created`,
+        "PROJECT_CREATED"
+      );
+    }
+  }
+
+  return project;
 };
 
 export const getAllProjects = async (userId: number, role: string) => {
@@ -122,13 +142,22 @@ export const addMemberToProject = async (projectId: number, targetUserId: number
     throw new Error("User is already a member of this project");
   }
 
-  return prisma.projectTeam.create({
+  const newMember = await prisma.projectTeam.create({
     data: {
       project_id: projectId,
       user_id: targetUserId,
       project_role: projectRole
     }
   });
+
+  await createNotification(
+    targetUserId,
+    "Added to Project",
+    `You have been added to project "${project.project_name}" as ${projectRole}`,
+    "PROJECT_MEMBER_ADDED"
+  );
+
+  return newMember;
 };
 
 export const getProjectMembers = async (projectId: number, requesterId: number, requesterRole: string) => {

@@ -1,4 +1,5 @@
 import prisma from "../config/prisma";
+import { createNotification } from "./notification.service";
 
 export const createTask = async (data: any, userId: number, role: string) => {
   const project = await prisma.project.findUnique({
@@ -40,6 +41,18 @@ export const createTask = async (data: any, userId: number, role: string) => {
     await prisma.taskAssigned.createMany({
       data: assigneesData
     });
+
+    // Notify assignees
+    for (const assigneeId of data.assignees) {
+      if (assigneeId !== userId) {
+        await createNotification(
+          assigneeId,
+          "New Task Assigned",
+          `You have been assigned to task: "${task.title}"`,
+          "TASK_ASSIGNED"
+        );
+      }
+    }
   }
 
   return getTaskById(task.task_id, userId, role);
@@ -137,10 +150,27 @@ export const updateTask = async (taskId: number, data: any, userId: number, role
 
   if (!canEditFull && canEditStatus) {
     // Only allow status update
-    return prisma.task.update({
+    const updated = await prisma.task.update({
       where: { task_id: taskId },
       data: { status: data.status || task.status }
     });
+
+    if (data.status && data.status !== task.status) {
+      // Notify creator and assignees
+      const notifyUsers = new Set<number>();
+      if (task.created_by !== userId) notifyUsers.add(task.created_by);
+      task.assignees.forEach(a => { if (a.user_id !== userId) notifyUsers.add(a.user_id); });
+      
+      for (const uid of notifyUsers) {
+        await createNotification(
+          uid,
+          "Task Status Updated",
+          `Status of task "${task.title}" changed to ${data.status}`,
+          "TASK_STATUS_CHANGED"
+        );
+      }
+    }
+    return updated;
   }
 
   const updatedTask = await prisma.task.update({
@@ -168,6 +198,34 @@ export const updateTask = async (taskId: number, data: any, userId: number, role
       await prisma.taskAssigned.createMany({
         data: assigneesData
       });
+      
+      // Notify new assignees
+      for (const assigneeId of data.assignees) {
+        if (assigneeId !== userId) {
+          await createNotification(
+            assigneeId,
+            "New Task Assigned",
+            `You have been assigned to task: "${updatedTask.title}"`,
+            "TASK_ASSIGNED"
+          );
+        }
+      }
+    }
+  }
+
+  if (data.status && data.status !== task.status) {
+    // Notify creator and assignees about status change
+    const notifyUsers = new Set<number>();
+    if (task.created_by !== userId) notifyUsers.add(task.created_by);
+    task.assignees.forEach(a => { if (a.user_id !== userId) notifyUsers.add(a.user_id); });
+    
+    for (const uid of notifyUsers) {
+      await createNotification(
+        uid,
+        "Task Status Updated",
+        `Status of task "${updatedTask.title}" changed to ${data.status}`,
+        "TASK_STATUS_CHANGED"
+      );
     }
   }
 

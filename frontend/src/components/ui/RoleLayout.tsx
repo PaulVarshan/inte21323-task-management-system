@@ -1,6 +1,7 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from './Button';
+import { NotificationBell } from './NotificationBell';
 
 interface NavItem {
   path: string;
@@ -108,8 +109,13 @@ export const RoleLayout = ({ roleName, navItems }: { roleName: string, navItems:
       </div>
 
       {/* Main Content */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-        <Outlet />
+      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'flex-end', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)' }}>
+          <NotificationBell />
+        </div>
+        <div style={{ flex: 1, padding: '1rem' }}>
+          <Outlet />
+        </div>
       </div>
     </div>
   );
