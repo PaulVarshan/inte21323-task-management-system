@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getNotifications, markAsRead, markAllAsRead, Notification } from '../services/notification.service';
+import { getNotifications, markAsRead, markAllAsRead, type Notification } from '../services/notification.service';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '../components/ui/Button';
 

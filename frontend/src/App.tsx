@@ -15,7 +15,7 @@ import { CollaboratorLayout } from './layouts/CollaboratorLayout';
 
 // Generic Placeholders
 import { ComingSoonPage } from './pages/ComingSoonPage';
-import { EmptyTablePage } from './pages/EmptyTablePage';
+// removed unused import
 
 // New Modules
 import { UsersPage } from './pages/UsersPage';

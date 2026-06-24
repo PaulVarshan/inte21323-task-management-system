@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { getNotifications, markAsRead, markAllAsRead, Notification } from '../../services/notification.service';
+import { getNotifications, markAsRead, markAllAsRead, type Notification } from '../../services/notification.service';
 import { NotificationDropdown } from './NotificationDropdown';
 import { useAuth } from '../../context/AuthContext';
 

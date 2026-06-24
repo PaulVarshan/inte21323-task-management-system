@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAllUsers, changeUserRole, changeUserStatus, User } from '../services/user.service';
+import { getAllUsers, changeUserRole, changeUserStatus, type User } from '../services/user.service';
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';

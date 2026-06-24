@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getUserById, updateUserDetails, User } from '../services/user.service';
+import { getUserById, updateUserDetails, type User } from '../services/user.service';
 import { Button } from '../components/ui/Button';
 
 export const EditUserPage: React.FC = () => {

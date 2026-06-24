@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Notification } from '../../services/notification.service';
+import type { Notification } from '../../services/notification.service';
 import { useNavigate } from 'react-router-dom';
 
 interface NotificationDropdownProps {
