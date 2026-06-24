@@ -1,20 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg-dark: #0f172a;
-  --bg-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  --bg-dark: #f0f2f5;
+  --bg-gradient: #f4f7f6;
   
-  --primary-color: #6366f1;
-  --primary-hover: #4f46e5;
-  --primary-glow: rgba(99, 102, 241, 0.5);
+  --primary-color: #6BB39F;
+  --primary-hover: #5A9E8B;
+  --primary-glow: rgba(107, 179, 159, 0.2);
   
-  --surface-color: rgba(255, 255, 255, 0.05);
-  --surface-border: rgba(255, 255, 255, 0.1);
-  --surface-blur: blur(12px);
+  --surface-color: #ffffff;
+  --surface-border: #e5e7eb;
+  --surface-blur: blur(0px);
   
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
   
   --error-color: #ef4444;
   --success-color: #10b981;
@@ -54,11 +54,9 @@ a:hover {
 /* Glassmorphism Utilities */
 .glass-panel {
   background: var(--surface-color);
-  backdrop-filter: var(--surface-blur);
-  -webkit-backdrop-filter: var(--surface-blur);
   border: 1px solid var(--surface-border);
   border-radius: var(--border-radius);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
 /* Page Layouts */
@@ -81,8 +79,8 @@ a:hover {
 .input-field {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--surface-border);
+  background: #f9fafb;
+  border: 1px solid transparent;
   border-radius: 8px;
   color: var(--text-primary);
   font-family: var(--font-family);

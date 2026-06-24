@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { AuthCard } from '../components/ui/AuthCard';
+import { SplitAuthLayout } from '../components/ui/SplitAuthLayout';
 import { InputField } from '../components/ui/InputField';
 import { Button } from '../components/ui/Button';
 import api from '../services/api';
+import { Mail, Lock } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -33,39 +34,42 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <AuthCard title="Welcome Back" subtitle="Sign in to your account">
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <SplitAuthLayout isLogin={true} onToggleMode={() => navigate('/register')}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
         {error && <div className="error-message">{error}</div>}
         
         <InputField
-          label="Email Address"
           type="email"
           id="email"
+          icon={<Mail size={18} />}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+          placeholder="Email"
           required
         />
         
         <InputField
-          label="Password"
           type="password"
           id="password"
+          icon={<Lock size={18} />}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
+          placeholder="Password"
           required
         />
         
-        <Button type="submit" isLoading={isLoading}>
-          Sign In
-        </Button>
+        <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+          <a href="/forgot-password" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textDecoration: 'underline' }}>
+            Forgot your password?
+          </a>
+        </div>
+        
+        <div style={{ marginTop: '1rem', width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <Button type="submit" isLoading={isLoading} style={{ borderRadius: '50px', background: 'var(--primary-color)', width: '200px' }}>
+            SIGN IN
+          </Button>
+        </div>
       </form>
-      
-      <div className="auth-links">
-        <Link to="/forgot-password">Forgot password?</Link>
-        <Link to="/register">Don't have an account?</Link>
-      </div>
-    </AuthCard>
+    </SplitAuthLayout>
   );
 };

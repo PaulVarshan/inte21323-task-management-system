@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { AuthCard } from '../components/ui/AuthCard';
+import { useNavigate } from 'react-router-dom';
+import { SplitAuthLayout } from '../components/ui/SplitAuthLayout';
 import { InputField } from '../components/ui/InputField';
 import { Button } from '../components/ui/Button';
 import api from '../services/api';
+import { User, Mail, Lock } from 'lucide-react';
 
 export const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -27,7 +28,6 @@ export const RegisterPage: React.FC = () => {
 
     try {
       await api.post('/register', { username, email, password });
-      // On success, redirect to login
       navigate('/login');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
@@ -37,58 +37,56 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <AuthCard title="Create Account" subtitle="Join our platform today">
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <SplitAuthLayout isLogin={false} onToggleMode={() => navigate('/login')}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
         {error && <div className="error-message">{error}</div>}
         
         <InputField
-          label="Username"
           type="text"
           id="username"
+          icon={<User size={18} />}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="johndoe"
+          placeholder="Name"
           required
         />
         
         <InputField
-          label="Email Address"
           type="email"
           id="email"
+          icon={<Mail size={18} />}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+          placeholder="Email"
           required
         />
         
         <InputField
-          label="Password"
           type="password"
           id="password"
+          icon={<Lock size={18} />}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
+          placeholder="Password"
           required
         />
 
         <InputField
-          label="Confirm Password"
           type="password"
           id="confirmPassword"
+          icon={<Lock size={18} />}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="••••••••"
+          placeholder="Confirm Password"
           required
         />
         
-        <Button type="submit" isLoading={isLoading}>
-          Sign Up
-        </Button>
+        <div style={{ marginTop: '1rem', width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <Button type="submit" isLoading={isLoading} style={{ borderRadius: '50px', background: 'var(--primary-color)', width: '200px' }}>
+            SIGN UP
+          </Button>
+        </div>
       </form>
-      
-      <div className="auth-links" style={{ justifyContent: 'center' }}>
-        <Link to="/login">Already have an account? Sign in</Link>
-      </div>
-    </AuthCard>
+    </SplitAuthLayout>
   );
 };

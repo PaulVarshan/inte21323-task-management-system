@@ -40,7 +40,7 @@ import { AddTeamMemberPage } from './pages/AddTeamMemberPage';
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/adminLogin" element={<AdminLoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
