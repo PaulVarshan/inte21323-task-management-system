@@ -7,9 +7,18 @@ interface ProjectProgressProps {
 
 export const ProjectProgress: React.FC<ProjectProgressProps> = ({ projects }) => {
   return (
-    <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      <h3 style={{ margin: 0, fontSize: '1.1rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.75rem' }}>
-        📈 Project Task Progress
+    <div style={{ 
+      background: '#fff', 
+      borderRadius: '24px', 
+      boxShadow: '0 4px 15px rgba(0,0,0,0.05)', 
+      border: '1px solid var(--surface-border)',
+      padding: '1.75rem 1.5rem', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      gap: '1.5rem' 
+    }}>
+      <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+        Project Task Progress
       </h3>
       
       {projects.length === 0 ? (
@@ -29,14 +38,14 @@ export const ProjectProgress: React.FC<ProjectProgressProps> = ({ projects }) =>
               <div style={{
                 width: '100%',
                 height: '8px',
-                background: 'rgba(255, 255, 255, 0.05)',
+                background: '#f3f4f6', // Light gray track for light theme
                 borderRadius: '999px',
                 overflow: 'hidden'
               }}>
                 <div style={{
                   width: `${proj.progress_percentage}%`,
                   height: '100%',
-                  background: 'linear-gradient(90deg, var(--primary-color) 0%, #a855f7 100%)',
+                  background: 'linear-gradient(90deg, #34d399 0%, var(--primary-color) 100%)', // Vibrant green gradient
                   borderRadius: '999px',
                   transition: 'width 0.4s ease-out'
                 }} />

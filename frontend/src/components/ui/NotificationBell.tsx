@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { getNotifications, markAsRead, markAllAsRead, type Notification } from '../../services/notification.service';
 import { NotificationDropdown } from './NotificationDropdown';
 import { useAuth } from '../../context/AuthContext';
+import { Bell } from 'lucide-react';
 
 export const NotificationBell: React.FC = () => {
   const { user } = useAuth();
@@ -89,19 +90,25 @@ export const NotificationBell: React.FC = () => {
           }
         }}
         style={{
-          background: 'transparent',
-          border: 'none',
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid rgba(255,255,255,0.05)',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+          borderRadius: '50%',
+          width: '42px',
+          height: '42px',
           color: '#fff',
-          fontSize: '1.5rem',
           cursor: 'pointer',
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '0.5rem'
+          padding: 0,
+          transition: 'transform 0.2s'
         }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
       >
-        🔔
+        <Bell size={20} strokeWidth={2.5} />
         {unreadCount > 0 && (
           <span style={{
             position: 'absolute',

@@ -87,42 +87,23 @@ export const PMDashboard: React.FC = () => {
   if (loading) return <div className="page-container">Loading Dashboard Analytics...</div>;
 
   return (
-    <div className="dashboard-container" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div className="dashboard-container" style={{ padding: '0', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', margin: 0 }}>
-            {user?.role === 'Admin' ? 'Admin Dashboard' : 'Project Manager Dashboard'}
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>
-            Welcome back, <strong style={{ color: 'var(--text-primary)' }}>{user?.username}</strong>. Here is your system-wide task progress.
-          </p>
-        </div>
-      </div>
-
       {error && <div className="error-message">{error}</div>}
 
       {/* Row 1: Overview stats cards */}
       {stats && <OverviewCards stats={stats} />}
 
       {/* Row 2: Project progress & Task Status count widgets */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '1.25rem' }}>
         <ProjectProgress projects={projectProgress} />
         {taskStatus && <TaskStatusOverview statusCounts={taskStatus} />}
       </div>
 
       {/* Row 3: Overdue tasks & Upcoming deadlines */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '1.25rem' }}>
         <OverdueTasks tasks={overdueTasks} onTaskClick={setSelectedTaskId} />
         {upcomingDeadlines && <UpcomingDeadlines deadlines={upcomingDeadlines} onTaskClick={setSelectedTaskId} />}
-      </div>
-
-      {/* Row 4: Recent Tasks, Team workload, & Quick Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr', gap: '2rem' }}>
-        <RecentTasks tasks={recentTasks} onTaskClick={setSelectedTaskId} />
-        <TeamWorkload workload={teamWorkload} />
-        <QuickActions />
       </div>
 
       {/* Integrated Part 5 task details widget modal */}
