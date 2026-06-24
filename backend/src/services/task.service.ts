@@ -1,5 +1,6 @@
 import prisma from "../config/prisma";
 import { createNotification } from "./notification.service";
+import { getIO } from "../utils/socket";
 
 export const createTask = async (data: any, userId: number, role: string) => {
   const project = await prisma.project.findUnique({
@@ -156,9 +157,10 @@ export const updateTask = async (taskId: number, data: any, userId: number, role
     });
 
     if (data.status && data.status !== task.status) {
-      // Notify creator and assignees
+      // Notify creator, assignees, and project manager
       const notifyUsers = new Set<number>();
       if (task.created_by !== userId) notifyUsers.add(task.created_by);
+      if (task.project.created_by !== userId) notifyUsers.add(task.project.created_by);
       task.assignees.forEach(a => { if (a.user_id !== userId) notifyUsers.add(a.user_id); });
       
       for (const uid of notifyUsers) {
@@ -170,7 +172,9 @@ export const updateTask = async (taskId: number, data: any, userId: number, role
         );
       }
     }
-    return updated;
+    const finalTask = await getTaskById(taskId, userId, role);
+    getIO().emit("task-updated", finalTask);
+    return finalTask;
   }
 
   const updatedTask = await prisma.task.update({
@@ -214,9 +218,10 @@ export const updateTask = async (taskId: number, data: any, userId: number, role
   }
 
   if (data.status && data.status !== task.status) {
-    // Notify creator and assignees about status change
+    // Notify creator, assignees, and project manager about status change
     const notifyUsers = new Set<number>();
     if (task.created_by !== userId) notifyUsers.add(task.created_by);
+    if (task.project.created_by !== userId) notifyUsers.add(task.project.created_by);
     task.assignees.forEach(a => { if (a.user_id !== userId) notifyUsers.add(a.user_id); });
     
     for (const uid of notifyUsers) {
@@ -229,7 +234,9 @@ export const updateTask = async (taskId: number, data: any, userId: number, role
     }
   }
 
-  return getTaskById(taskId, userId, role);
+  const finalTask = await getTaskById(taskId, userId, role);
+  getIO().emit("task-updated", finalTask);
+  return finalTask;
 };
 
 export const deleteTask = async (taskId: number, userId: number, role: string) => {
@@ -247,6 +254,18 @@ export const deleteTask = async (taskId: number, userId: number, role: string) =
 
   if (!canDelete) {
     throw new Error("Unauthorized to delete this task");
+  }
+
+  // Notify assignees about deletion
+  for (const assignee of task.assignees) {
+    if (assignee.user_id !== userId) {
+      await createNotification(
+        assignee.user_id,
+        "Task Deleted",
+        `The task "${task.title}" you were assigned to has been deleted.`,
+        "TASK_DELETED"
+      );
+    }
   }
 
   return prisma.task.delete({

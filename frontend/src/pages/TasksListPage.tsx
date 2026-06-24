@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
 import { Link } from 'react-router-dom';
 import { getTasks, deleteTask, updateTask } from '../services/task.service';
 import { getProjects } from '../services/project.service';
@@ -38,6 +39,28 @@ export const TasksListPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/auth';
+    const baseUrl = API_URL.replace(/\/api\/auth\/?$/, '');
+    const socket = io(baseUrl, { withCredentials: true });
+
+    socket.on('task-updated', (updatedTask: Task) => {
+      setTasks(prevTasks => {
+        const exists = prevTasks.some(t => t.task_id === updatedTask.task_id);
+        if (exists) {
+          return prevTasks.map(t => t.task_id === updatedTask.task_id ? updatedTask : t);
+        } else {
+          return [...prevTasks, updatedTask];
+        }
+      });
+      setSelectedTask(prev => prev?.task_id === updatedTask.task_id ? updatedTask : prev);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const handleDelete = async (id: number) => {

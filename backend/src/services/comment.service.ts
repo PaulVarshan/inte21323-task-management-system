@@ -9,7 +9,12 @@ export const createComment = async (userId: number, taskId: number, commentText:
   // Verify task exists
   const task = await prisma.task.findUnique({
     where: { task_id: taskId },
-    include: { assignees: true }
+    include: { 
+      assignees: true,
+      project: {
+        include: { team_members: true }
+      }
+    }
   });
   if (!task) {
     throw new Error("Task not found");
@@ -32,18 +37,25 @@ export const createComment = async (userId: number, taskId: number, commentText:
     }
   });
 
-  // Notify task creator and assignees about the new comment
+  // Notify task creator, assignees, and PMs about the new comment
   const notifyUsers = new Set<number>();
   if (task.created_by !== userId) notifyUsers.add(task.created_by);
+  if (task.project.created_by !== userId) notifyUsers.add(task.project.created_by);
+  task.project.team_members.forEach(m => {
+    if (m.project_role === "INCHARGE" && m.user_id !== userId) notifyUsers.add(m.user_id);
+  });
   task.assignees.forEach(a => {
     if (a.user_id !== userId) notifyUsers.add(a.user_id);
   });
+
+  const shortTaskName = task.title.length > 25 ? task.title.substring(0, 22) + '...' : task.title;
+  const shortUserName = comment.user.username.length > 15 ? comment.user.username.substring(0, 12) + '...' : comment.user.username;
 
   for (const uid of notifyUsers) {
     await createNotification(
       uid,
       "New Comment",
-      `A new comment was added to task "${task.title}"`,
+      `New comment added to "${shortTaskName}" by ${shortUserName}`,
       "TASK_COMMENT"
     );
   }

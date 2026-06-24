@@ -17,21 +17,23 @@ export const createProject = async (data: any, userId: number) => {
     }
   });
 
-  // Notify Admins
+  // Notify Admins and Creator
   const admins = await prisma.userRole.findMany({
     where: { role: { role_name: "Admin" } },
     select: { user_id: true }
   });
 
-  for (const admin of admins) {
-    if (admin.user_id !== userId) {
-      await createNotification(
-        admin.user_id,
-        "New Project Created",
-        `Project "${project.project_name}" has been created`,
-        "PROJECT_CREATED"
-      );
-    }
+  const notifyUsers = new Set<number>();
+  notifyUsers.add(userId);
+  admins.forEach(admin => notifyUsers.add(admin.user_id));
+
+  for (const uid of notifyUsers) {
+    await createNotification(
+      uid,
+      "New Project Created",
+      `Project "${project.project_name}" has been created.`,
+      "PROJECT_CREATED"
+    );
   }
 
   return project;
@@ -108,11 +110,28 @@ export const updateProject = async (projectId: number, data: any, userId: number
 };
 
 export const deleteProject = async (projectId: number, userId: number, role: string) => {
-  const project = await prisma.project.findUnique({ where: { project_id: projectId } });
+  const project = await prisma.project.findUnique({ 
+    where: { project_id: projectId },
+    include: { team_members: true }
+  });
   
   if (!project) throw new Error("Project not found");
   if (role !== "Admin" && project.created_by !== userId) {
     throw new Error("Only the project creator or an Admin can delete the project");
+  }
+
+  // Notify team members
+  if (project.team_members && project.team_members.length > 0) {
+    for (const member of project.team_members) {
+      if (member.user_id !== userId) {
+        await createNotification(
+          member.user_id,
+          "Project Deleted",
+          `The project "${project.project_name}" you were part of has been deleted.`,
+          "PROJECT_DELETED"
+        );
+      }
+    }
   }
 
   return prisma.project.delete({

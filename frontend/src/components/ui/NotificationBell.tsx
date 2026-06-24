@@ -82,7 +82,12 @@ export const NotificationBell: React.FC = () => {
   return (
     <div ref={dropdownRef} style={{ position: 'relative' }}>
       <button 
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen && unreadCount > 0) {
+            handleMarkAllAsRead();
+          }
+        }}
         style={{
           background: 'transparent',
           border: 'none',
