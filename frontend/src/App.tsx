@@ -15,7 +15,12 @@ import { CollaboratorLayout } from './layouts/CollaboratorLayout';
 
 // Generic Placeholders
 import { ComingSoonPage } from './pages/ComingSoonPage';
-import { EmptyTablePage } from './pages/EmptyTablePage';
+// removed unused import
+
+// New Modules
+import { UsersPage } from './pages/UsersPage';
+import { EditUserPage } from './pages/EditUserPage';
+import { NotificationsPage } from './pages/NotificationsPage';
 
 // Project Pages (for PM use)
 import { ProjectsListPage } from './pages/ProjectsListPage';
@@ -48,8 +53,8 @@ function App() {
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<PMDashboard />} />
-          <Route path="users" element={<EmptyTablePage title="User Management" columns={['Name', 'Email', 'Role', 'Status', 'Actions']} actionLabel="Create User" />} />
-          
+          <Route path="users" element={<UsersPage />} />
+          <Route path="users/edit/:id" element={<EditUserPage />} />
           <Route path="projects" element={<ProjectsListPage />} />
           <Route path="projects/new" element={<CreateProjectPage />} />
           <Route path="projects/edit/:id" element={<EditProjectPage />} />
@@ -61,7 +66,7 @@ function App() {
           <Route path="tasks/kanban" element={<KanbanBoard />} />
 
           <Route path="reports" element={<ComingSoonPage title="System Reports" />} />
-          <Route path="notifications" element={<ComingSoonPage title="Notifications" />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="" element={<Navigate to="dashboard" replace />} />
         </Route>
 
@@ -83,7 +88,7 @@ function App() {
           <Route path="tasks/kanban" element={<KanbanBoard />} />
 
           <Route path="reports" element={<ComingSoonPage title="Project Reports" />} />
-          <Route path="notifications" element={<ComingSoonPage title="Notifications" />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="" element={<Navigate to="dashboard" replace />} />
         </Route>
 
@@ -100,7 +105,7 @@ function App() {
           
           <Route path="comments" element={<ComingSoonPage title="Task Comments" />} />
           <Route path="attachments" element={<ComingSoonPage title="Attachments" />} />
-          <Route path="notifications" element={<ComingSoonPage title="Notifications" />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="" element={<Navigate to="dashboard" replace />} />
         </Route>
       </Route>

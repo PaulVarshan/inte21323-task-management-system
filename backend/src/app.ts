@@ -8,6 +8,8 @@ import taskRoutes from "./routes/task.routes";
 import commentRoutes from "./routes/comment.routes";
 import attachmentRoutes from "./routes/attachment.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
+import notificationRoutes from "./routes/notification.routes";
+import userRoutes from "./routes/user.routes";
 
 const app = express();
 
@@ -27,5 +29,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/attachments", attachmentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/users", userRoutes);
 
 export default app;
