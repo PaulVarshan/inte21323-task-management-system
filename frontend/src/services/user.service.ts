@@ -27,6 +27,11 @@ export interface User {
   user_roles: UserRole[];
 }
 
+export const createUser = async (data: { username: string; email: string; role: string }) => {
+  const response = await userApi.post('/', data);
+  return response.data.data as User;
+};
+
 export const getAllUsers = async () => {
   const response = await userApi.get('/users');
   return response.data.data as User[];

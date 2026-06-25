@@ -18,9 +18,9 @@ api.interceptors.response.use(
     
     // Check if the request is for an authentication endpoint
     const isAuthEndpoint = originalRequest.url && (
-      originalRequest.url.endsWith('/login') ||
-      originalRequest.url.endsWith('/adminLogin') ||
-      originalRequest.url.endsWith('/refresh')
+      originalRequest.url.toLowerCase().endsWith('/login') ||
+      originalRequest.url.toLowerCase().endsWith('/adminlogin') ||
+      originalRequest.url.toLowerCase().endsWith('/refresh')
     );
 
     // If the error is 401 and we haven't retried yet, and it's not an auth endpoint
@@ -36,8 +36,8 @@ api.interceptors.response.use(
       } catch (refreshError) {
         // Refresh failed (e.g. refresh token expired)
         // Only redirect to login if we are not already on a public route to prevent redirect loops
-        const publicRoutes = ['/', '/login', '/adminLogin', '/register', '/forgot-password'];
-        const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+        const publicRoutes = ['/', '/login', '/adminlogin', '/register', '/forgot-password', '/reset-password'];
+        const currentPath = (window.location.pathname.replace(/\/$/, '') || '/').toLowerCase();
         
         if (!publicRoutes.includes(currentPath)) {
           window.location.href = '/login';

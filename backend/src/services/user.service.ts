@@ -1,4 +1,29 @@
 import prisma from "../config/prisma";
+import bcrypt from "bcryptjs";
+export const createUser = async (username: string, email: string, roleName: string, passwordHash: string) => {
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+  if (existingUser) throw new Error("Email already exists");
+
+  const role = await prisma.role.findUnique({ where: { role_name: roleName } });
+  if (!role) throw new Error("Role not found");
+
+  const user = await prisma.user.create({
+    data: {
+      username,
+      email,
+      password_hash: passwordHash
+    }
+  });
+
+  await prisma.userRole.create({
+    data: {
+      user_id: user.user_id,
+      role_id: role.role_id
+    }
+  });
+
+  return getUserById(user.user_id);
+};
 
 export const getAllUsers = async () => {
   return prisma.user.findMany({

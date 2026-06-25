@@ -63,6 +63,10 @@ export const loginUser = async (
     throw new Error("Invalid credentials");
   }
 
+  if (!user.is_active) {
+    throw new Error("Your account has been deactivated. Please contact an administrator.");
+  }
+
   const validPassword = await bcrypt.compare(
     password,
     user.password_hash

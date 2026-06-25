@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as userService from "../services/user.service";
+import { sendWelcomeEmail } from "../utils/email";
 
 interface AuthRequest extends Request {
   user?: any;
@@ -12,6 +13,31 @@ const requireAdmin = (req: AuthRequest, res: Response) => {
     return false;
   }
   return true;
+};
+
+export const createUser = async (req: AuthRequest, res: Response) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const { username, email, role } = req.body;
+    
+    if (!username || !email || !role) {
+      return res.status(400).json({ success: false, message: "Username, email, and role are required" });
+    }
+
+    // Generate a strong random password
+    const plainTextPassword = require('crypto').randomBytes(8).toString('hex') + 'Aa1!';
+    const passwordHash = await require('bcryptjs').hash(plainTextPassword, 10);
+
+    const user = await userService.createUser(username, email, role, passwordHash);
+
+    // Send welcome email with generated password
+    await sendWelcomeEmail(email, username, plainTextPassword);
+
+    return res.status(201).json({ success: true, message: "User created successfully", data: user });
+  } catch (error: any) {
+    if (error.message.includes("already exists")) return res.status(400).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message || "Failed to create user" });
+  }
 };
 
 export const getAllUsers = async (req: AuthRequest, res: Response) => {
