@@ -7,6 +7,8 @@ import type { Project } from '../services/project.service';
 import { TaskDetailsModal } from '../components/TaskDetailsModal';
 import { DndContext, useDraggable, useDroppable, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
+import { useAuth } from '../context/AuthContext';
+import { createComment } from '../services/comment.service';
 
 const statusColumns = ['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE'] as const;
 
@@ -161,6 +163,7 @@ export const KanbanBoard: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -177,10 +180,25 @@ export const KanbanBoard: React.FC = () => {
 
     if (taskData.status === newStatus) return;
 
+    if (user?.role === 'Collaborator' && newStatus === 'DONE') {
+      setError("Collaborators cannot mark tasks as DONE");
+      return;
+    }
+
+    let commentContent = "";
+    if (taskData.status === 'REVIEW' && newStatus === 'IN_PROGRESS' && user?.role !== 'Collaborator') {
+      const reason = window.prompt("Reason for rejecting and moving back to In Progress:");
+      if (reason === null) return; // User cancelled
+      commentContent = reason;
+    }
+
     // Optimistic update
     setTasks(prev => prev.map(t => t.task_id === taskId ? { ...t, status: newStatus } : t));
 
     try {
+      if (commentContent) {
+        await createComment(taskId, commentContent);
+      }
       await updateTask(taskId, { status: newStatus });
     } catch (err: any) {
       console.error(err);

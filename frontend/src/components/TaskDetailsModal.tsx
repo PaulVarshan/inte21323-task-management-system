@@ -68,8 +68,20 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, isOp
 
   const handleStatusChange = async (newStatus: string) => {
     if (!task) return;
+    
+    let commentContent = "";
+    if (task.status === 'REVIEW' && newStatus === 'IN_PROGRESS' && currentUser?.role !== 'Collaborator') {
+      const reason = window.prompt("Reason for rejecting and moving back to In Progress:");
+      if (reason === null) return; // User cancelled
+      commentContent = reason;
+    }
+
     try {
       setUpdatingStatus(true);
+      if (commentContent) {
+        const created = await createComment(taskId, commentContent);
+        setComments(prev => [...prev, created]);
+      }
       const updated = await updateTask(task.task_id, { status: newStatus });
       setTask(updated);
       if (onTaskUpdated) onTaskUpdated();
@@ -471,7 +483,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, isOp
                       <option value="TODO">TODO</option>
                       <option value="IN_PROGRESS">IN PROGRESS</option>
                       <option value="REVIEW">REVIEW</option>
-                      <option value="DONE">DONE</option>
+                      {currentUser?.role !== 'Collaborator' && <option value="DONE">DONE</option>}
                     </select>
                   </div>
 
