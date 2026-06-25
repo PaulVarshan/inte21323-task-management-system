@@ -50,14 +50,14 @@ export const ProjectsListPage: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <div className="glass-panel" style={{ padding: '2rem' }}>
+      <div style={{ background: '#fff', borderRadius: '24px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', border: '1px solid var(--surface-border)', padding: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h1>Projects</h1>
+          <h1 style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)' }}>Projects</h1>
           {currentUser?.role !== 'Collaborator' && (
             <div style={{ width: '200px' }}>
               <Link to="new">
-              <Button>Create New Project</Button>
-            </Link>
+                <Button style={{ width: '100%', background: 'var(--primary-color)' }}>Create New Project</Button>
+              </Link>
             </div>
           )}
         </div>
@@ -69,13 +69,13 @@ export const ProjectsListPage: React.FC = () => {
             type="text" 
             placeholder="Search projects..." 
             className="input-field" 
-            style={{ marginBottom: 0, flex: 1 }}
+            style={{ marginBottom: 0, flex: 1, background: '#f9fafb', border: '1px solid var(--surface-border)' }}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           <select 
             className="input-field" 
-            style={{ marginBottom: 0, width: '200px' }}
+            style={{ marginBottom: 0, width: '200px', background: '#f9fafb', border: '1px solid var(--surface-border)' }}
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
@@ -89,26 +89,35 @@ export const ProjectsListPage: React.FC = () => {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
           {filteredProjects.map(project => (
-            <div key={project.project_id} style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px' }}>
-              <h3 style={{ marginBottom: '0.5rem' }}>{project.project_name}</h3>
-              <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                Status: <strong>{project.status}</strong>
+            <div key={project.project_id} style={{ 
+              background: '#f9fafb', 
+              padding: '1.5rem', 
+              borderRadius: '16px',
+              border: '1px solid var(--surface-border)',
+              transition: 'transform 0.2s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>{project.project_name}</h3>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 1rem 0', fontSize: '0.9rem' }}>
+                Status: <strong style={{ color: 'var(--text-primary)' }}>{project.status}</strong>
               </p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#9ca3af', marginBottom: '1.5rem' }}>
                 <span>Start: {new Date(project.start_date).toLocaleDateString()}</span>
                 <span>End: {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A'}</span>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <Link to={`${project.project_id}`} style={{ flex: 1 }}>
-                  <Button style={{ width: '100%', background: 'var(--surface-color)' }}>View</Button>
+                  <Button style={{ width: '100%', background: '#fff', color: 'var(--text-primary)', border: '1px solid var(--surface-border)' }}>View</Button>
                 </Link>
                 {currentUser?.role !== 'Collaborator' && (
                   <>
                     <Link to={`edit/${project.project_id}`} style={{ flex: 1 }}>
-                      <Button style={{ width: '100%', background: 'var(--surface-color)' }}>Edit</Button>
+                      <Button style={{ width: '100%', background: '#fff', color: 'var(--text-primary)', border: '1px solid var(--surface-border)' }}>Edit</Button>
                     </Link>
                     <Button 
-                      style={{ flex: 1, background: 'var(--error-color)' }}
+                      style={{ flex: 1, background: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5' }}
                       onClick={() => handleDelete(project.project_id)}
                     >
                       Delete

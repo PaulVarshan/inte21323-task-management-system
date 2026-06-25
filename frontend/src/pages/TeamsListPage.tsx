@@ -260,7 +260,7 @@ export const TeamsListPage: React.FC = () => {
                   ))
                 }
               </select>
-              <Button style={{ flex: 1, background: 'var(--surface-color)' }} onClick={() => setSelectedProject(null)}>Close</Button>
+              <Button style={{ flex: 1, background: '#fff', color: 'var(--text-primary)', border: '1px solid var(--surface-border)' }} onClick={() => setSelectedProject(null)}>Close</Button>
             </div>
           </div>
         </div>
