@@ -43,3 +43,18 @@ export const deleteAttachment = async (attachmentId: number) => {
   const response = await attachmentApi.delete(`/attachments/${attachmentId}`);
   return response.data;
 };
+
+export interface GlobalAttachment {
+  attachment_id: number;
+  file_name: string;
+  file_url: string;
+  uploaded_at: string;
+  uploaded_by: string;
+  task_name: string;
+  project_name: string;
+}
+
+export const getAllAttachments = async () => {
+  const response = await attachmentApi.get(`/attachments`);
+  return response.data.data as GlobalAttachment[];
+};

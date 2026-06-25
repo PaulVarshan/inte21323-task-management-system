@@ -1,5 +1,6 @@
 import React from 'react';
 import type { OverviewStats } from '../../services/dashboard.service';
+import { ArrowUpRight, TrendingUp } from 'lucide-react';
 
 interface OverviewCardsProps {
   stats: OverviewStats;
@@ -7,61 +8,80 @@ interface OverviewCardsProps {
 
 export const OverviewCards: React.FC<OverviewCardsProps> = ({ stats }) => {
   const cards = [
-    { title: 'Total Projects', value: stats.total_projects, color: '#6366f1', icon: '📂' },
-    { title: 'Active Projects', value: stats.active_projects, color: '#3b82f6', icon: '⚡' },
-    { title: 'Total Tasks', value: stats.total_tasks, color: '#a855f7', icon: '📋' },
-    { title: 'Completed Tasks', value: stats.completed_tasks, color: '#10b981', icon: '✅' },
-    { title: 'In Progress Tasks', value: stats.in_progress_tasks, color: '#eab308', icon: '🔄' },
-    { title: 'Overdue Tasks', value: stats.overdue_tasks, color: '#ef4444', icon: '⚠️', highlight: stats.overdue_tasks > 0 },
+    { title: 'Total Projects', value: stats.total_projects, isPrimary: true },
+    { title: 'Active Projects', value: stats.active_projects },
+    { title: 'Total Tasks', value: stats.total_tasks },
+    { title: 'Completed Tasks', value: stats.completed_tasks },
+    { title: 'In Progress Tasks', value: stats.in_progress_tasks },
+    { title: 'Overdue Tasks', value: stats.overdue_tasks, isDanger: stats.overdue_tasks > 0 },
   ];
 
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '1rem',
-      marginBottom: '2rem'
+      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+      gap: '1.25rem'
     }}>
-      {cards.map((card, idx) => (
-        <div
-          key={idx}
-          className="glass-panel"
-          style={{
-            padding: '1.25rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            border: card.highlight ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid var(--surface-border)',
-            background: card.highlight ? 'rgba(239, 68, 68, 0.08)' : 'rgba(255, 255, 255, 0.02)',
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = `0 10px 20px -5px ${card.color}25`;
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <div>
-            <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500, marginBottom: '0.5rem' }}>
+      {cards.map((card, idx) => {
+        const isGreen = card.isPrimary;
+        const textColor = isGreen ? '#fff' : 'var(--text-primary)';
+        const bgColor = isGreen ? 'linear-gradient(135deg, var(--primary-color), #2d4a3e)' : '#fff';
+        const circleBg = '#fff';
+        const circleColor = isGreen ? '#2d4a3e' : 'var(--text-primary)';
+        const circleBorder = isGreen ? 'none' : '1px solid #e5e7eb';
+        const subtitleColor = isGreen ? 'rgba(255,255,255,0.7)' : '#9ca3af';
+
+        return (
+          <div
+            key={idx}
+            style={{
+              padding: '1.75rem 1.5rem',
+              borderRadius: '24px',
+              background: bgColor,
+              color: textColor,
+              boxShadow: isGreen ? '0 10px 25px -5px rgba(45, 74, 62, 0.4)' : '0 4px 15px rgba(0,0,0,0.05)',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              transition: 'transform 0.2s ease',
+              border: card.isDanger ? '1px solid rgba(239, 68, 68, 0.4)' : (isGreen ? 'none' : '1px solid var(--surface-border)')
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600, marginBottom: '0.5rem' }}>
               {card.title}
-            </span>
-            <span style={{ fontSize: '1.75rem', fontWeight: 700, color: card.highlight ? '#ef4444' : 'var(--text-primary)' }}>
+            </h3>
+            
+            <div style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1 }}>
               {card.value}
-            </span>
+            </div>
+
+            {/* Top Right Arrow Circle */}
+            <div style={{
+              position: 'absolute',
+              top: '1.5rem',
+              right: '1.5rem',
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: circleBg,
+              border: circleBorder,
+              color: circleColor,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <ArrowUpRight size={18} strokeWidth={2.5} />
+            </div>
+
           </div>
-          <span style={{
-            fontSize: '1.75rem',
-            padding: '0.5rem',
-            background: 'rgba(255, 255, 255, 0.04)',
-            borderRadius: '8px'
-          }}>
-            {card.icon}
-          </span>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

@@ -7,7 +7,7 @@ const router = Router();
 
 // Apply auth middlewares
 router.use(authenticate);
-router.use(authorize("Admin", "Project Manager"));
+router.use(authorize("Admin", "Project Manager", "Collaborator"));
 
 router.get("/overview", dashboardController.getOverview);
 router.get("/project-progress", dashboardController.getProjectProgress);

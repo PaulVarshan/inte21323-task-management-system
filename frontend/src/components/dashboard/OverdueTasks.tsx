@@ -8,9 +8,18 @@ interface OverdueTasksProps {
 
 export const OverdueTasks: React.FC<OverdueTasksProps> = ({ tasks, onTaskClick }) => {
   return (
-    <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-      <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#ef4444', borderBottom: '1px solid rgba(239, 68, 68, 0.15)', paddingBottom: '0.75rem' }}>
-        ⚠️ Overdue Tasks
+    <div style={{ 
+      background: '#fff', 
+      borderRadius: '24px', 
+      boxShadow: '0 4px 15px rgba(0,0,0,0.05)', 
+      border: '1px solid var(--surface-border)',
+      padding: '1.75rem 1.5rem', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      gap: '1.5rem' 
+    }}>
+      <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+        Overdue Tasks
       </h3>
       
       <div style={{ overflowX: 'auto' }}>
@@ -32,17 +41,16 @@ export const OverdueTasks: React.FC<OverdueTasksProps> = ({ tasks, onTaskClick }
               </tr>
             ) : (
               tasks.map((task) => (
-                <tr key={task.task_id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', color: '#ef4444' }}>
+                <tr key={task.task_id} style={{ borderBottom: '1px solid var(--surface-border)', color: 'var(--text-primary)' }}>
                   <td style={{ padding: '0.75rem' }}>
                     <button
                       onClick={() => onTaskClick && onTaskClick(task.task_id)}
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: '#ef4444',
+                        color: 'var(--text-primary)',
                         fontWeight: 600,
                         cursor: 'pointer',
-                        textDecoration: 'underline',
                         padding: 0,
                         textAlign: 'left'
                       }}
@@ -50,8 +58,10 @@ export const OverdueTasks: React.FC<OverdueTasksProps> = ({ tasks, onTaskClick }
                       {task.title}
                     </button>
                   </td>
-                  <td style={{ padding: '0.75rem', color: 'rgba(239,68,68,0.8)' }}>{task.project_name}</td>
-                  <td style={{ padding: '0.75rem', color: 'rgba(239,68,68,0.8)' }}>
+                  <td style={{ padding: '0.75rem', color: 'var(--text-secondary)' }}>
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block', verticalAlign: 'bottom' }} title={task.project_name}>{task.project_name}</span>
+                  </td>
+                  <td style={{ padding: '0.75rem', color: 'var(--text-secondary)' }}>
                     {task.assignees.join(', ') || 'Unassigned'}
                   </td>
                   <td style={{ padding: '0.75rem', fontWeight: 500 }}>

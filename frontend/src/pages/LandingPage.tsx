@@ -20,9 +20,10 @@ export const LandingPage: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         gap: '2rem',
-        alignItems: 'center'
+        alignItems: 'center',
+        background: '#fff', // Solid white instead of glass
       }}>
-        <h1 style={{ fontSize: '3rem', fontWeight: '800', background: 'linear-gradient(90deg, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        <h1 style={{ fontSize: '3rem', fontWeight: '800', background: 'linear-gradient(90deg, var(--primary-color), #2d3748)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           Task Management System
         </h1>
         
@@ -37,15 +38,15 @@ export const LandingPage: React.FC = () => {
             </Button>
           </Link>
           <Link to="/register" style={{ textDecoration: 'none' }}>
-            <Button style={{ padding: '0.75rem 2rem', fontSize: '1.1rem', background: 'transparent', border: '1px solid var(--primary-color)' }}>
+            <Button style={{ padding: '0.75rem 2rem', fontSize: '1.1rem', background: 'transparent', color: 'var(--primary-color)', border: '2px solid var(--primary-color)' }}>
               Create Account
             </Button>
           </Link>
         </div>
 
-        <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', width: '100%' }}>
+        <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--surface-border)', width: '100%' }}>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-            Are you a system administrator? <Link to="/adminlogin" style={{ color: 'var(--primary-light)', textDecoration: 'none' }}>Admin Portal</Link>
+            Are you a system administrator? <Link to="/adminlogin" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontWeight: 600 }}>Admin Portal</Link>
           </p>
         </div>
       </div>
