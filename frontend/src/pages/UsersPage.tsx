@@ -29,8 +29,8 @@ export const UsersPage: React.FC = () => {
 
   const handleStatusChange = async (userId: number, currentStatus: boolean) => {
     try {
-      const updatedUser = await changeUserStatus(userId, !currentStatus);
-      setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, is_active: updatedUser.is_active } : u));
+      await changeUserStatus(userId, !currentStatus);
+      await fetchUsers();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to change user status');
     }
@@ -106,12 +106,7 @@ export const UsersPage: React.FC = () => {
                   </td>
                   <td style={{ padding: '1rem', textAlign: 'right' }}>
                     <Button 
-                      onClick={() => navigate(`/admin/users/edit/${user.user_id}`)}
-                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', marginRight: '0.5rem' }}
-                    >
-                      Edit
-                    </Button>
-                    <Button 
+                      type="button"
                       onClick={() => handleStatusChange(user.user_id, user.is_active)}
                       style={{ 
                         padding: '0.25rem 0.5rem', 

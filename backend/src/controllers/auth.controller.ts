@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
+import crypto from "crypto";
+import bcrypt from "bcrypt";
 import { registerUser, loginUser } from "../services/auth.service";
+import { sendResetEmail } from "../utils/email";
 
 export const register = async (req: Request, res: Response) => {
     try {
@@ -199,5 +202,98 @@ export const getAllUsers = async (req: Request, res: Response) => {
     res.json({ success: true, data: mappedUsers });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    let { email, role } = req.body;
+    
+    if (!email || !role) {
+      return res.status(400).json({ success: false, message: "Email and role are required" });
+    }
+
+    email = email.trim();
+
+    if (role === "Admin") {
+      return res.status(403).json({ success: false, message: "Email not found or reset not allowed" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { user_roles: { include: { role: true } } }
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Email not found or reset not allowed" });
+    }
+
+    const userRoles = user.user_roles.map(ur => ur.role.role_name);
+    if (!userRoles.includes(role)) {
+      return res.status(400).json({ success: false, message: "Email not found or reset not allowed" });
+    }
+
+    if (userRoles.includes("Admin")) {
+      return res.status(403).json({ success: false, message: "Email not found or reset not allowed" });
+    }
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await prisma.user.update({
+      where: { user_id: user.user_id },
+      data: {
+        reset_token: otpCode,
+        reset_token_expires: resetTokenExpires
+      }
+    });
+
+    await sendResetEmail(user.email, otpCode);
+
+    res.json({ success: true, message: "Password reset OTP sent successfully" });
+  } catch (error: any) {
+    console.error("Forgot Password Error:", error);
+    res.status(500).json({ success: false, message: "An error occurred while processing your request" });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ success: false, message: "Email, OTP, and new password are required" });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email: email.trim(),
+        reset_token: otp.trim(),
+        reset_token_expires: {
+          gt: new Date()
+        }
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await prisma.user.update({
+      where: { user_id: user.user_id },
+      data: {
+        password_hash: hashedPassword,
+        reset_token: null,
+        reset_token_expires: null
+      }
+    });
+
+    res.json({ success: true, message: "Password reset successfully" });
+  } catch (error: any) {
+    console.error("Reset Password Error:", error);
+    res.status(500).json({ success: false, message: "An error occurred while resetting your password" });
   }
 };

@@ -14,8 +14,8 @@ router.use(authenticate);
 
 router.get("/", getAllUsers);
 router.get("/:id", getUserById);
-router.put("/:id", updateUserDetails);
 router.put("/:id/role", changeUserRole);
 router.put("/:id/status", changeUserStatus);
+router.put("/:id", updateUserDetails);
 
 export default router;

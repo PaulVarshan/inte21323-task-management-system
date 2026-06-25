@@ -8,7 +8,9 @@ import {
   logout,
   checkAuth,
   getAllUsers,
-  refresh
+  refresh,
+  forgotPassword,
+  resetPassword
 } from "../controllers/auth.controller";
 
 const router = Router();
@@ -20,5 +22,7 @@ router.post("/logout", logout);
 router.post("/refresh", refresh);
 router.get("/checkAuth", authenticate, checkAuth);
 router.get("/users", authenticate, getAllUsers);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 export default router;
