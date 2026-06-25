@@ -95,13 +95,13 @@ export const PMDashboard: React.FC = () => {
       {stats && <OverviewCards stats={stats} />}
 
       {/* Row 2: Project progress & Task Status count widgets */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
         <ProjectProgress projects={projectProgress} />
         {taskStatus && <TaskStatusOverview statusCounts={taskStatus} />}
       </div>
 
       {/* Row 3: Overdue tasks & Upcoming deadlines */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
         <OverdueTasks tasks={overdueTasks} onTaskClick={setSelectedTaskId} />
         {upcomingDeadlines && <UpcomingDeadlines deadlines={upcomingDeadlines} onTaskClick={setSelectedTaskId} />}
       </div>

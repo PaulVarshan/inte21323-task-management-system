@@ -89,10 +89,20 @@ export const ProjectsListPage: React.FC = () => {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
           {filteredProjects.map(project => (
-            <div key={project.project_id} style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '8px' }}>
-              <h3 style={{ marginBottom: '0.5rem' }}>{project.project_name}</h3>
+            <div key={project.project_id} style={{ 
+              background: 'var(--surface-color)', 
+              padding: '1.5rem', 
+              borderRadius: '16px',
+              border: '1px solid var(--surface-border)',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+              transition: 'transform 0.2s ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}>{project.project_name}</h3>
               <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                Status: <strong>{project.status}</strong>
+                Status: <strong style={{ color: 'var(--primary-color)' }}>{project.status}</strong>
               </p>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
                 <span>Start: {new Date(project.start_date).toLocaleDateString()}</span>
@@ -100,15 +110,15 @@ export const ProjectsListPage: React.FC = () => {
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <Link to={`${project.project_id}`} style={{ flex: 1 }}>
-                  <Button style={{ width: '100%', background: 'var(--surface-color)' }}>View</Button>
+                  <Button style={{ width: '100%', background: '#e5e7eb', color: 'var(--text-primary)' }}>View</Button>
                 </Link>
                 {currentUser?.role !== 'Collaborator' && (
                   <>
                     <Link to={`edit/${project.project_id}`} style={{ flex: 1 }}>
-                      <Button style={{ width: '100%', background: 'var(--surface-color)' }}>Edit</Button>
+                      <Button style={{ width: '100%', background: '#e5e7eb', color: 'var(--text-primary)' }}>Edit</Button>
                     </Link>
                     <Button 
-                      style={{ flex: 1, background: 'var(--error-color)' }}
+                      style={{ flex: 1, background: 'var(--error-color)', color: '#fff' }}
                       onClick={() => handleDelete(project.project_id)}
                     >
                       Delete

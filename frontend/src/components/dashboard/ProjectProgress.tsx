@@ -28,7 +28,16 @@ export const ProjectProgress: React.FC<ProjectProgressProps> = ({ projects }) =>
           {projects.map((proj) => (
             <div key={proj.project_id} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
-                <span style={{ fontWeight: 500 }}>{proj.project_name}</span>
+                <span style={{ 
+                  fontWeight: 500, 
+                  whiteSpace: 'nowrap', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis', 
+                  maxWidth: '14ch', 
+                  display: 'inline-block' 
+                }} title={proj.project_name}>
+                  {proj.project_name}
+                </span>
                 <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                   {proj.completed_tasks}/{proj.total_tasks} Tasks ({proj.progress_percentage}%)
                 </span>

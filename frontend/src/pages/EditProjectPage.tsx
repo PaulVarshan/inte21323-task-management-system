@@ -180,7 +180,7 @@ export const EditProjectPage: React.FC = () => {
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
             <Link to="../.." relative="path" style={{ flex: 1 }}>
-              <Button type="button" style={{ width: '100%', background: 'var(--surface-color)' }}>Cancel</Button>
+              <Button type="button" style={{ width: '100%', background: '#e5e7eb', color: 'var(--text-primary)' }}>Cancel</Button>
             </Link>
           </div>
         </form>
