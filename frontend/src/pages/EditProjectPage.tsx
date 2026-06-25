@@ -106,7 +106,7 @@ export const EditProjectPage: React.FC = () => {
 
   return (
     <div className="page-container">
-      <div className="glass-panel" style={{ padding: '2rem', width: '100%', maxWidth: '600px' }}>
+      <div className="glass-panel" style={{ width: '100%', maxWidth: '600px' }}>
         <h1 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Edit Project</h1>
         
         {error && <div className="error-message">{error}</div>}
@@ -135,7 +135,7 @@ export const EditProjectPage: React.FC = () => {
             />
           </div>
           
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div className="form-row">
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Start Date *</label>
               <input 
@@ -175,12 +175,12 @@ export const EditProjectPage: React.FC = () => {
             </select>
           </div>
           
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+          <div className="form-row" style={{ marginTop: '1rem' }}>
             <Button type="submit" style={{ flex: 2 }} disabled={saving}>
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
-            <Link to="../.." relative="path" style={{ flex: 1 }}>
-              <Button type="button" style={{ width: '100%', background: '#e5e7eb', color: 'var(--text-primary)' }}>Cancel</Button>
+            <Link to="../.." relative="path" style={{ flex: 1, display: 'flex' }}>
+              <Button type="button" style={{ width: '100%', background: '#e5e7eb', color: 'var(--text-primary)', height: '100%' }}>Cancel</Button>
             </Link>
           </div>
         </form>

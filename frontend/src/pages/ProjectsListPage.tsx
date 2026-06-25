@@ -50,14 +50,14 @@ export const ProjectsListPage: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <div className="glass-panel" style={{ padding: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h1>Projects</h1>
+      <div className="glass-panel">
+        <div className="header-actions">
+          <h1 style={{ margin: 0 }}>Projects</h1>
           {currentUser?.role !== 'Collaborator' && (
-            <div style={{ width: '200px' }}>
+            <div>
               <Link to="new">
-              <Button>Create New Project</Button>
-            </Link>
+                <Button style={{ whiteSpace: 'nowrap' }}>Create New Project</Button>
+              </Link>
             </div>
           )}
         </div>
@@ -87,7 +87,7 @@ export const ProjectsListPage: React.FC = () => {
           </select>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
           {filteredProjects.map(project => (
             <div key={project.project_id} style={{ 
               background: 'var(--surface-color)', 
@@ -96,29 +96,31 @@ export const ProjectsListPage: React.FC = () => {
               border: '1px solid var(--surface-border)',
               boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
               transition: 'transform 0.2s ease',
+              display: 'flex',
+              flexDirection: 'column'
             }}
             onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
             onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
             >
-              <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}>{project.project_name}</h3>
+              <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch' }} title={project.project_name}>{project.project_name}</h3>
               <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
                 Status: <strong style={{ color: 'var(--primary-color)' }}>{project.status}</strong>
               </p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+              <div className="card-dates">
                 <span>Start: {new Date(project.start_date).toLocaleDateString()}</span>
                 <span>End: {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A'}</span>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <Link to={`${project.project_id}`} style={{ flex: 1 }}>
-                  <Button style={{ width: '100%', background: '#e5e7eb', color: 'var(--text-primary)' }}>View</Button>
+              <div className="card-actions" style={{ marginTop: 'auto' }}>
+                <Link to={`${project.project_id}`} style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+                  <Button style={{ padding: '0.4rem', fontSize: '0.85rem', background: '#e5e7eb', color: 'var(--text-primary)', width: '100%' }}>View</Button>
                 </Link>
                 {currentUser?.role !== 'Collaborator' && (
                   <>
-                    <Link to={`edit/${project.project_id}`} style={{ flex: 1 }}>
-                      <Button style={{ width: '100%', background: '#e5e7eb', color: 'var(--text-primary)' }}>Edit</Button>
+                    <Link to={`edit/${project.project_id}`} style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+                      <Button style={{ padding: '0.4rem', fontSize: '0.85rem', background: '#e5e7eb', color: 'var(--text-primary)', width: '100%' }}>Edit</Button>
                     </Link>
                     <Button 
-                      style={{ flex: 1, background: 'var(--error-color)', color: '#fff' }}
+                      style={{ flex: 1, padding: '0.4rem', fontSize: '0.85rem', background: 'var(--error-color)', color: '#fff', width: '100%' }}
                       onClick={() => handleDelete(project.project_id)}
                     >
                       Delete

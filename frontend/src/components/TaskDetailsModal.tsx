@@ -283,8 +283,8 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, isOp
                 Task Details
               </span>
               <h2 style={{ margin: '0.25rem 0', fontSize: '1.75rem' }}>{task.title}</h2>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                Project: <strong style={{ color: 'var(--text-primary)' }}>{task.project?.project_name || 'N/A'}</strong>
+              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center' }}>
+                Project: <strong style={{ color: 'var(--text-primary)', marginLeft: '0.25rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block', verticalAlign: 'bottom' }} title={task.project?.project_name || 'N/A'}>{task.project?.project_name || 'N/A'}</strong>
               </p>
             </div>
 

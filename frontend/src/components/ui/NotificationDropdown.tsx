@@ -37,7 +37,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       maxHeight: '400px',
       overflowY: 'auto',
       background: 'var(--surface-color)',
-      border: '1px solid rgba(255,255,255,0.1)',
+      border: '1px solid var(--surface-border)',
       borderRadius: '12px',
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
       zIndex: 1000,
@@ -46,7 +46,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     }}>
       <div style={{
         padding: '1rem',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        borderBottom: '1px solid var(--surface-border)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
@@ -80,8 +80,10 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
               onClick={() => !notification.is_read && onMarkAsRead(notification.notification_id)}
               style={{
                 padding: '1rem',
-                borderBottom: '1px solid rgba(255,255,255,0.05)',
-                background: notification.is_read ? 'transparent' : 'rgba(74, 144, 226, 0.1)',
+                margin: '0.5rem',
+                border: '1px solid var(--surface-border)',
+                borderRadius: '8px',
+                background: notification.is_read ? '#f9fafb' : 'rgba(74, 144, 226, 0.05)',
                 cursor: notification.is_read ? 'default' : 'pointer',
                 transition: 'background 0.2s'
               }}
@@ -107,8 +109,8 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             padding: '1rem',
             background: 'none',
             border: 'none',
-            borderTop: '1px solid rgba(255,255,255,0.1)',
-            color: '#fff',
+            borderTop: '1px solid var(--surface-border)',
+            color: 'var(--primary-color)',
             cursor: 'pointer',
             fontWeight: '600'
           }}

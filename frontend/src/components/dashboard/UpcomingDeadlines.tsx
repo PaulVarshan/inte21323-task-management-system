@@ -75,7 +75,10 @@ export const UpcomingDeadlines: React.FC<UpcomingDeadlinesProps> = ({ deadlines,
                       {t.title}
                     </button>
                     <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-                      {t.project_name} • {new Date(t.due_date).toLocaleDateString()}
+                      <span style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block', verticalAlign: 'bottom' }} title={t.project_name}>{t.project_name}</span> 
+                        <span style={{ margin: '0 0.25rem' }}>•</span> {new Date(t.due_date).toLocaleDateString()}
+                      </span>
                     </span>
                   </div>
                 ))

@@ -93,17 +93,20 @@ export const ProjectDetailsPage: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ margin: 0 }}>Project Details</h1>
-        <Link to="..">
-          <Button style={{ background: 'var(--surface-color)' }}>Back to Projects</Button>
-        </Link>
+      <div className="header-actions">
+        <div className="mobile-hidden" style={{ flex: 1 }}></div>
+        <h1 style={{ margin: 0, textAlign: 'center' }}>Project Details</h1>
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+          <Link to="..">
+            <Button style={{ background: 'var(--surface-color)', color: 'var(--text-primary)', border: '1px solid var(--surface-border)', whiteSpace: 'nowrap' }}>Back to Projects</Button>
+          </Link>
+        </div>
       </div>
 
       {error && <div className="error-message">{error}</div>}
       {success && <div className="error-message" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success-color)' }}>{success}</div>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
         {/* Project Details Panel */}
         <div className="glass-panel" style={{ padding: '2rem', alignSelf: 'start' }}>
           <h2 style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem' }}>
@@ -145,8 +148,8 @@ export const ProjectDetailsPage: React.FC = () => {
           {isAdminOrCreator && (
             <form onSubmit={handleAddMember} style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
               <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Add New Member</h3>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'end' }}>
-                <div style={{ flex: 2 }}>
+              <div className="form-row" style={{ alignItems: 'flex-end' }}>
+                <div style={{ flex: 2, width: '100%' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>User</label>
                   <select 
                     className="input-field" 
@@ -161,7 +164,7 @@ export const ProjectDetailsPage: React.FC = () => {
                     ))}
                   </select>
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, width: '100%' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Role</label>
                   <select 
                     className="input-field" 
@@ -173,7 +176,7 @@ export const ProjectDetailsPage: React.FC = () => {
                     <option value="INCHARGE">INCHARGE</option>
                   </select>
                 </div>
-                <Button type="submit" disabled={addingMember || availableUsers.length === 0}>
+                <Button type="submit" disabled={addingMember || availableUsers.length === 0} style={{ width: '100%' }}>
                   {addingMember ? 'Adding...' : 'Add'}
                 </Button>
               </div>
@@ -187,20 +190,21 @@ export const ProjectDetailsPage: React.FC = () => {
             ) : (
               members.map(member => (
                 <div key={member.project_team_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
-                  <div>
-                    <div style={{ fontWeight: 500 }}>{member.user?.username}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{member.user?.email}</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                     <span style={{ 
-                      fontSize: '0.8rem', 
-                      padding: '0.25rem 0.5rem', 
+                      fontSize: '0.7rem', 
+                      padding: '0.15rem 0.4rem', 
                       background: member.project_role === 'INCHARGE' ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255,255,255,0.1)',
                       color: member.project_role === 'INCHARGE' ? 'var(--primary-color)' : 'var(--text-primary)',
-                      borderRadius: '4px'
+                      borderRadius: '4px',
+                      marginBottom: '0.4rem'
                     }}>
                       {member.project_role}
                     </span>
+                    <div style={{ fontWeight: 500 }}>{member.user?.username}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{member.user?.email}</div>
+                  </div>
+                  <div>
                     {isAdminOrCreator && (
                       <button 
                         onClick={() => handleRemoveMember(member.user_id)}

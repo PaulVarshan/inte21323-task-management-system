@@ -143,8 +143,8 @@ export const KanbanBoard: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.75rem' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>{task.title}</h3>
-          <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-            {task.project?.project_name || 'No project'}
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
+            Project: <span style={{ marginLeft: '0.25rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block' }} title={task.project?.project_name}>{task.project?.project_name || 'No project'}</span>
           </p>
         </div>
         <span

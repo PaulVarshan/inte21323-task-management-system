@@ -130,7 +130,7 @@ export const TeamsListPage: React.FC = () => {
                 onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
                 onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
               >
-                <h3 style={{ marginBottom: '0.5rem' }}>{project.project_name}</h3>
+                <h3 style={{ marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch' }} title={project.project_name}>{project.project_name}</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
                   {getProjectMembers(project.project_id).length} Team Members
                 </p>
@@ -176,7 +176,9 @@ export const TeamsListPage: React.FC = () => {
               }}
             >&times;</button>
             
-            <h2 style={{ marginBottom: '1.5rem' }}>Team: {selectedProject.project_name}</h2>
+            <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+              Team: <span style={{ marginLeft: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block' }} title={selectedProject.project_name}>{selectedProject.project_name}</span>
+            </h2>
             
             <div style={{ overflowY: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>

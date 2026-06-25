@@ -125,7 +125,7 @@ export const TasksListPage: React.FC = () => {
                 onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
                 onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
               >
-                <h3 style={{ marginBottom: '0.5rem' }}>{project.project_name}</h3>
+                <h3 style={{ marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch' }} title={project.project_name}>{project.project_name}</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
                   {getProjectTasks(project.project_id).length} Tasks
                 </p>
@@ -171,7 +171,9 @@ export const TasksListPage: React.FC = () => {
               }}
             >&times;</button>
             
-            <h2 style={{ marginBottom: '1.5rem' }}>Tasks: {selectedProject.project_name}</h2>
+            <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+              Tasks: <span style={{ marginLeft: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block' }} title={selectedProject.project_name}>{selectedProject.project_name}</span>
+            </h2>
             
             <div style={{ overflowY: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
@@ -212,7 +214,11 @@ export const TasksListPage: React.FC = () => {
                             {task.title}
                           </button>
                         </td>
-                        <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{task.project?.project_name}</td>
+                        <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block', verticalAlign: 'bottom' }} title={task.project?.project_name}>
+                            {task.project?.project_name}
+                          </span>
+                        </td>
                         <td style={{ padding: '1rem' }}>
                           <span style={{ color: getPriorityColor(task.priority), fontWeight: 'bold', fontSize: '0.9rem' }}>
                             {task.priority}

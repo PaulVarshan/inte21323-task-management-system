@@ -58,7 +58,9 @@ export const OverdueTasks: React.FC<OverdueTasksProps> = ({ tasks, onTaskClick }
                       {task.title}
                     </button>
                   </td>
-                  <td style={{ padding: '0.75rem', color: 'var(--text-secondary)' }}>{task.project_name}</td>
+                  <td style={{ padding: '0.75rem', color: 'var(--text-secondary)' }}>
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block', verticalAlign: 'bottom' }} title={task.project_name}>{task.project_name}</span>
+                  </td>
                   <td style={{ padding: '0.75rem', color: 'var(--text-secondary)' }}>
                     {task.assignees.join(', ') || 'Unassigned'}
                   </td>
