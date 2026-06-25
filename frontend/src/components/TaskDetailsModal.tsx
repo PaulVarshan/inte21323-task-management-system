@@ -239,10 +239,10 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, isOp
         flexDirection: 'column',
         padding: '2rem',
         position: 'relative',
-        background: 'rgba(15, 23, 42, 0.98)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        background: 'var(--surface-color)',
+        border: '1px solid var(--surface-border)',
         color: 'var(--text-primary)',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
       }} onClick={(e) => e.stopPropagation()}>
         
         {/* Close Button */}
@@ -318,7 +318,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, isOp
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '0.75rem', fontWeight: 600 }}>Description</h3>
                   <div style={{ 
                     padding: '1.25rem', 
-                    background: 'rgba(0, 0, 0, 0.25)', 
+                    background: 'var(--bg-gradient)', 
                     border: '1px solid var(--surface-border)',
                     borderRadius: '8px',
                     lineHeight: '1.6',
@@ -374,7 +374,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, isOp
                         return (
                           <div key={c.comment_id} style={{
                             padding: '1rem',
-                            background: 'rgba(255, 255, 255, 0.03)',
+                            background: 'var(--bg-gradient)',
                             border: '1px solid var(--surface-border)',
                             borderRadius: '8px',
                             display: 'flex',
@@ -466,7 +466,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, isOp
                       value={task.status}
                       disabled={updatingStatus}
                       onChange={(e) => handleStatusChange(e.target.value)}
-                      style={{ marginBottom: 0, padding: '0.5rem', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--surface-border)', width: '100%', height: 'auto', cursor: 'pointer' }}
+                      style={{ marginBottom: 0, padding: '0.5rem', background: 'var(--bg-gradient)', border: '1px solid var(--surface-border)', width: '100%', height: 'auto', cursor: 'pointer', color: 'var(--text-primary)' }}
                     >
                       <option value="TODO">TODO</option>
                       <option value="IN_PROGRESS">IN PROGRESS</option>
@@ -511,7 +511,8 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, isOp
                             <div style={{
                               width: '20px', height: '20px',
                               borderRadius: '50%',
-                              background: 'rgba(255,255,255,0.1)',
+                              background: 'var(--bg-gradient)',
+                              color: 'var(--primary-color)',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
                               fontSize: '0.75rem', fontWeight: 'bold'
                             }}>
@@ -525,119 +526,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, isOp
                   </div>
                 </div>
 
-                {/* Attachments Section */}
-                <div style={{ borderTop: '1px solid var(--surface-border)', paddingTop: '1.5rem' }}>
-                  <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: 600 }}>
-                    Attachments ({attachments.length})
-                  </h3>
-
-                  {/* Upload Form */}
-                  <div style={{ marginBottom: '1.5rem', background: 'rgba(0,0,0,0.15)', padding: '1rem', borderRadius: '8px', border: '1px dashed var(--surface-border)' }}>
-                    <input
-                      id="file-upload-input"
-                      type="file"
-                      onChange={handleFileChange}
-                      style={{ display: 'none' }}
-                      accept=".pdf,.docx,.png,.jpg,.jpeg"
-                    />
-                    <label 
-                      htmlFor="file-upload-input"
-                      style={{
-                        display: 'block',
-                        padding: '0.5rem',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid var(--surface-border)',
-                        borderRadius: '6px',
-                        textAlign: 'center',
-                        cursor: 'pointer',
-                        fontSize: '0.9rem',
-                        marginBottom: '0.75rem',
-                        transition: 'background 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
-                    >
-                      {selectedFile ? `📁 ${selectedFile.name}` : '📁 Choose File'}
-                    </label>
-                    
-                    {selectedFile && (
-                      <Button 
-                        onClick={handleUploadFile}
-                        disabled={uploading}
-                        style={{ padding: '0.4rem', fontSize: '0.9rem' }}
-                      >
-                        {uploading ? 'Uploading...' : 'Upload File'}
-                      </Button>
-                    )}
-                    <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '0.4rem' }}>
-                      Max 5MB (.pdf, .docx, .png, .jpg, .jpeg)
-                    </span>
-                  </div>
-
-                  {/* Attachments List */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {attachments.length === 0 ? (
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontStyle: 'italic' }}>No files attached.</p>
-                    ) : (
-                      attachments.map(a => {
-                        const isOwner = a.uploaded_by_user_id === currentUser?.user_id;
-                        const isAdmin = currentUser?.role === 'Admin';
-                        const canDelete = isOwner || isAdmin;
-
-                        return (
-                          <div key={a.attachment_id} style={{
-                            padding: '0.75rem',
-                            background: 'rgba(0, 0, 0, 0.2)',
-                            border: '1px solid var(--surface-border)',
-                            borderRadius: '6px',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
-                              <span style={{ fontSize: '1.25rem' }}>{getFileIcon(a.file_name)}</span>
-                              <a 
-                                href={a.file_url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                style={{ 
-                                  fontSize: '0.85rem', 
-                                  color: 'var(--text-primary)', 
-                                  textDecoration: 'underline',
-                                  textOverflow: 'ellipsis',
-                                  overflow: 'hidden',
-                                  whiteSpace: 'nowrap'
-                                }}
-                                title={a.file_name}
-                              >
-                                {a.file_name.length > 20 ? `${a.file_name.substring(0, 18)}...` : a.file_name}
-                              </a>
-                            </div>
-
-                            {/* Delete Button */}
-                            {canDelete && (
-                              <button 
-                                onClick={() => handleDeleteAttachment(a.attachment_id)}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  color: 'var(--error-color)',
-                                  cursor: 'pointer',
-                                  fontSize: '0.8rem',
-                                  textDecoration: 'underline'
-                                }}
-                              >
-                                Delete
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-
-                </div>
+                {/* Attachments Section Removed */}
 
               </div>
 

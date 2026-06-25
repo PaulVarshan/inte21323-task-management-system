@@ -116,32 +116,31 @@ export const KanbanBoard: React.FC = () => {
       style={{
         width: '100%',
         textAlign: 'left',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        border: '1px solid var(--surface-border)',
         padding: '1rem',
         marginBottom: '1rem',
-        background: 'rgba(30, 30, 45, 0.6)',
-        backdropFilter: 'blur(10px)',
+        background: 'var(--surface-color)',
         cursor: 'pointer',
         borderRadius: '0.75rem',
         transition: 'all 0.3s ease',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
       }}
       onMouseEnter={(e) => {
         const target = e.currentTarget;
-        target.style.background = 'rgba(50, 50, 70, 0.8)';
-        target.style.border = '1px solid rgba(255, 255, 255, 0.2)';
-        target.style.boxShadow = `0 8px 16px rgba(0, 0, 0, 0.2), 0 0 20px rgba(${task.status === 'TODO' ? '59, 130, 246' : task.status === 'IN_PROGRESS' ? '234, 179, 8' : task.status === 'REVIEW' ? '147, 51, 234' : '34, 197, 94'}, 0.2)`;
+        target.style.background = 'var(--bg-gradient)';
+        target.style.border = '1px solid var(--primary-color)';
+        target.style.boxShadow = `0 8px 16px rgba(0, 0, 0, 0.1), 0 0 20px rgba(${task.status === 'TODO' ? '59, 130, 246' : task.status === 'IN_PROGRESS' ? '234, 179, 8' : task.status === 'REVIEW' ? '147, 51, 234' : '34, 197, 94'}, 0.2)`;
       }}
       onMouseLeave={(e) => {
         const target = e.currentTarget;
-        target.style.background = 'rgba(30, 30, 45, 0.6)';
-        target.style.border = '1px solid rgba(255, 255, 255, 0.1)';
-        target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+        target.style.background = 'var(--surface-color)';
+        target.style.border = '1px solid var(--surface-border)';
+        target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.05)';
       }}
       onClick={() => setSelectedTask(task)}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.75rem' }}>
-        <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '0.75rem' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>{task.title}</h3>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
             Project: <span style={{ marginLeft: '0.25rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block' }} title={task.project?.project_name}>{task.project?.project_name || 'No project'}</span>
@@ -157,6 +156,7 @@ export const KanbanBoard: React.FC = () => {
             backgroundColor: getPriorityColor(task.priority),
             whiteSpace: 'nowrap',
             alignSelf: 'flex-start',
+            flexShrink: 0,
             boxShadow: `0 4px 12px ${getPriorityColor(task.priority)}40`,
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
