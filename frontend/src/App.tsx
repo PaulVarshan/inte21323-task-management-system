@@ -21,6 +21,7 @@ import { ComingSoonPage } from './pages/ComingSoonPage';
 import { UsersPage } from './pages/UsersPage';
 import { EditUserPage } from './pages/EditUserPage';
 import { NotificationsPage } from './pages/NotificationsPage';
+import { AttachmentsPage } from './pages/AttachmentsPage';
 
 // Project Pages (for PM use)
 import { ProjectsListPage } from './pages/ProjectsListPage';
@@ -28,6 +29,7 @@ import { CreateProjectPage } from './pages/CreateProjectPage';
 import { EditProjectPage } from './pages/EditProjectPage';
 import { ProjectDetailsPage } from './pages/ProjectDetailsPage';
 import { PMDashboard } from './pages/PMDashboard';
+import { CollaboratorDashboard } from './pages/CollaboratorDashboard';
 
 // Tasks and Teams Pages
 import { TasksListPage } from './pages/TasksListPage';
@@ -64,6 +66,7 @@ function App() {
           <Route path="tasks/new" element={<CreateTaskPage />} />
           <Route path="tasks/edit/:id" element={<EditTaskPage />} />
           <Route path="tasks/kanban" element={<KanbanBoard />} />
+          <Route path="attachments" element={<AttachmentsPage />} />
 
 
           <Route path="notifications" element={<NotificationsPage />} />
@@ -86,6 +89,7 @@ function App() {
           <Route path="tasks/new" element={<CreateTaskPage />} />
           <Route path="tasks/edit/:id" element={<EditTaskPage />} />
           <Route path="tasks/kanban" element={<KanbanBoard />} />
+          <Route path="attachments" element={<AttachmentsPage />} />
 
 
           <Route path="notifications" element={<NotificationsPage />} />
@@ -94,7 +98,7 @@ function App() {
 
         {/* Collaborator Routes */}
         <Route path="/collaborator" element={<CollaboratorLayout />}>
-          <Route path="dashboard" element={<ComingSoonPage title="Collaborator Dashboard" />} />
+          <Route path="dashboard" element={<CollaboratorDashboard />} />
           
           <Route path="tasks" element={<TasksListPage />} />
           <Route path="tasks/edit/:id" element={<EditTaskPage />} />
@@ -104,7 +108,7 @@ function App() {
           <Route path="projects/:id" element={<ProjectDetailsPage />} />
           
           <Route path="comments" element={<ComingSoonPage title="Task Comments" />} />
-          <Route path="attachments" element={<ComingSoonPage title="Attachments" />} />
+          <Route path="attachments" element={<AttachmentsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="" element={<Navigate to="dashboard" replace />} />
         </Route>

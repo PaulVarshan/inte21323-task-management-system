@@ -6,6 +6,7 @@ const router = Router();
 
 router.use(authenticate);
 
+router.get("/", attachmentController.getAllAttachments);
 router.delete("/:attachmentId", attachmentController.deleteAttachment);
 
 export default router;

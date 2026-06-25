@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { io } from 'socket.io-client';
-import { getTasks } from '../services/task.service';
+import { getTasks, updateTask } from '../services/task.service';
 import type { Task } from '../services/task.service';
 import { getProjects } from '../services/project.service';
 import type { Project } from '../services/project.service';
 import { TaskDetailsModal } from '../components/TaskDetailsModal';
+import { DndContext, useDraggable, useDroppable, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
 
 const statusColumns = ['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE'] as const;
 
@@ -36,13 +38,121 @@ const getPriorityColor = (priority?: string) => {
   return priorityColorMap[priority] || '#999';
 };
 
-
-
 const formatDueDate = (dueDate: string | null) => {
   if (!dueDate) return 'No due date';
   const date = new Date(dueDate);
   return isNaN(date.getTime()) ? dueDate : date.toLocaleDateString();
 };
+
+const KanbanCard = ({ task, onClick, buildAssigneesLabel }: { task: Task, onClick: () => void, buildAssigneesLabel: (t: Task) => string }) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: task.task_id.toString(),
+    data: { task }
+  });
+
+  const style = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    opacity: isDragging ? 0.7 : 1,
+    zIndex: isDragging ? 999 : 1,
+    width: '100%',
+    textAlign: 'left' as const,
+    border: '1px solid var(--surface-border)',
+    padding: '1rem',
+    marginBottom: '1rem',
+    background: 'var(--surface-color)',
+    cursor: isDragging ? 'grabbing' : 'grab',
+    borderRadius: '0.75rem',
+    transition: transform ? 'none' : 'all 0.3s ease',
+    boxShadow: isDragging ? '0 12px 24px rgba(0,0,0,0.15)' : '0 4px 6px rgba(0, 0, 0, 0.05)',
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="glass-panel"
+      onMouseEnter={(e) => {
+        if (isDragging) return;
+        const target = e.currentTarget;
+        target.style.background = 'var(--bg-gradient)';
+        target.style.border = '1px solid var(--primary-color)';
+        target.style.boxShadow = `0 8px 16px rgba(0, 0, 0, 0.1), 0 0 20px rgba(${task.status === 'TODO' ? '59, 130, 246' : task.status === 'IN_PROGRESS' ? '234, 179, 8' : task.status === 'REVIEW' ? '147, 51, 234' : '34, 197, 94'}, 0.2)`;
+      }}
+      onMouseLeave={(e) => {
+        if (isDragging) return;
+        const target = e.currentTarget;
+        target.style.background = 'var(--surface-color)';
+        target.style.border = '1px solid var(--surface-border)';
+        target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.05)';
+      }}
+      onClick={(e) => {
+        // Prevent click when dragging
+        if (transform) {
+          e.stopPropagation();
+          return;
+        }
+        onClick();
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '0.75rem' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>{task.title}</h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
+            Project: <span style={{ marginLeft: '0.25rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block' }} title={task.project?.project_name}>{task.project?.project_name || 'No project'}</span>
+          </p>
+        </div>
+        <span
+          style={{
+            padding: '0.4rem 0.7rem',
+            borderRadius: '999px',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            color: '#fff',
+            backgroundColor: getPriorityColor(task.priority),
+            whiteSpace: 'nowrap',
+            alignSelf: 'flex-start',
+            flexShrink: 0,
+            boxShadow: `0 4px 12px ${getPriorityColor(task.priority)}40`,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          }}
+        >
+          {task.priority || 'Medium'}
+        </span>
+      </div>
+
+      <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+        📅 {formatDueDate(task.due_date)}
+      </p>
+      <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+        👥 {buildAssigneesLabel(task)}
+      </p>
+    </div>
+  );
+};
+
+const KanbanDroppableColumn = ({ status, children, ...props }: { status: StatusColumn, children: React.ReactNode, [key: string]: any }) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id: status,
+  });
+
+  return (
+    <section
+      ref={setNodeRef}
+      {...props}
+      style={{
+        ...props.style,
+        border: isOver ? `1px dashed ${columnColorMap[status].accent}` : props.style.border,
+        background: isOver ? `rgba(${columnColorMap[status].accent === '#3B82F6' ? '59,130,246' : columnColorMap[status].accent === '#EAB308' ? '234,179,8' : columnColorMap[status].accent === '#9333EA' ? '147,51,234' : '34,197,94'}, 0.15)` : props.style.background
+      }}
+    >
+      {children}
+    </section>
+  );
+};
+
 
 export const KanbanBoard: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -51,6 +161,34 @@ export const KanbanBoard: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+    
+    const taskId = parseInt(active.id as string);
+    const newStatus = over.id as StatusColumn;
+    const taskData = active.data.current?.task as Task;
+
+    if (taskData.status === newStatus) return;
+
+    // Optimistic update
+    setTasks(prev => prev.map(t => t.task_id === taskId ? { ...t, status: newStatus } : t));
+
+    try {
+      await updateTask(taskId, { status: newStatus });
+    } catch (err: any) {
+      console.error(err);
+      setError(err?.message || 'Failed to update task status');
+      // Revert on error
+      setTasks(prev => prev.map(t => t.task_id === taskId ? { ...t, status: taskData.status } : t));
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -108,73 +246,6 @@ export const KanbanBoard: React.FC = () => {
     return task.assignees?.map((assigned) => assigned.user?.username).filter(Boolean).join(', ') || 'Unassigned';
   };
 
-  const renderCard = (task: Task) => (
-    <button
-      key={task.task_id}
-      type="button"
-      className="glass-panel"
-      style={{
-        width: '100%',
-        textAlign: 'left',
-        border: '1px solid var(--surface-border)',
-        padding: '1rem',
-        marginBottom: '1rem',
-        background: 'var(--surface-color)',
-        cursor: 'pointer',
-        borderRadius: '0.75rem',
-        transition: 'all 0.3s ease',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-      }}
-      onMouseEnter={(e) => {
-        const target = e.currentTarget;
-        target.style.background = 'var(--bg-gradient)';
-        target.style.border = '1px solid var(--primary-color)';
-        target.style.boxShadow = `0 8px 16px rgba(0, 0, 0, 0.1), 0 0 20px rgba(${task.status === 'TODO' ? '59, 130, 246' : task.status === 'IN_PROGRESS' ? '234, 179, 8' : task.status === 'REVIEW' ? '147, 51, 234' : '34, 197, 94'}, 0.2)`;
-      }}
-      onMouseLeave={(e) => {
-        const target = e.currentTarget;
-        target.style.background = 'var(--surface-color)';
-        target.style.border = '1px solid var(--surface-border)';
-        target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.05)';
-      }}
-      onClick={() => setSelectedTask(task)}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '0.75rem' }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>{task.title}</h3>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
-            Project: <span style={{ marginLeft: '0.25rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block' }} title={task.project?.project_name}>{task.project?.project_name || 'No project'}</span>
-          </p>
-        </div>
-        <span
-          style={{
-            padding: '0.4rem 0.7rem',
-            borderRadius: '999px',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            color: '#fff',
-            backgroundColor: getPriorityColor(task.priority),
-            whiteSpace: 'nowrap',
-            alignSelf: 'flex-start',
-            flexShrink: 0,
-            boxShadow: `0 4px 12px ${getPriorityColor(task.priority)}40`,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-          }}
-        >
-          {task.priority || 'Medium'}
-        </span>
-      </div>
-
-      <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-        📅 {formatDueDate(task.due_date)}
-      </p>
-      <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-        👥 {buildAssigneesLabel(task)}
-      </p>
-    </button>
-  );
-
   return (
     <div className="dashboard-container" style={{ padding: '2rem' }}>
       <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
@@ -203,65 +274,71 @@ export const KanbanBoard: React.FC = () => {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-        {statusColumns.map((status) => {
-          const { tint, icon, accent } = columnColorMap[status];
-          const taskCount = tasksByStatus[status]?.length || 0;
-          return (
-            <section
-              key={status}
-              className="glass-panel"
-              style={{
-                height: 'calc(100vh - 280px)',
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '1.5rem',
-                border: `1px solid rgba(255, 255, 255, 0.1)`,
-                background: tint,
-                backdropFilter: 'blur(10px)',
-                borderRadius: '1rem',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                <span style={{ fontSize: '1.5rem' }}>{icon}</span>
-                <h2 style={{ margin: 0, fontSize: '1.1rem', textTransform: 'uppercase', letterSpacing: '0.1em', flex: 1 }}>
-                  {status.replace('_', ' ')}
-                </h2>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '999px',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    color: '#fff',
-                    backgroundColor: accent,
-                    boxShadow: `0 4px 12px ${accent}40`,
-                  }}
-                >
-                  {taskCount}
-                </span>
-              </div>
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          {statusColumns.map((status) => {
+            const { tint, icon, accent } = columnColorMap[status];
+            const taskCount = tasksByStatus[status]?.length || 0;
+            return (
+              <KanbanDroppableColumn
+                key={status}
+                status={status}
+                className="glass-panel"
+                style={{
+                  height: 'calc(100vh - 280px)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '1.5rem',
+                  border: `1px solid rgba(255, 255, 255, 0.1)`,
+                  background: tint,
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '1rem',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  transition: 'background 0.2s, border 0.2s'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>{icon}</span>
+                  <h2 style={{ margin: 0, fontSize: '1.1rem', textTransform: 'uppercase', letterSpacing: '0.1em', flex: 1 }}>
+                    {status.replace('_', ' ')}
+                  </h2>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '999px',
+                      fontSize: '0.85rem',
+                      fontWeight: 700,
+                      color: '#fff',
+                      backgroundColor: accent,
+                      boxShadow: `0 4px 12px ${accent}40`,
+                    }}
+                  >
+                    {taskCount}
+                  </span>
+                </div>
 
-              <div style={{ borderTop: `2px solid ${accent}40`, paddingTop: '1rem', flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
-                {loading ? (
-                  <p style={{ color: 'var(--text-secondary)' }}>Loading tasks…</p>
-                ) : taskCount > 0 ? (
-                  tasksByStatus[status].map(renderCard)
-                ) : (
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', textAlign: 'center', paddingTop: '2rem' }}>
-                    No tasks in this column
-                  </div>
-                )}
-              </div>
-            </section>
-          );
-        })}
-      </div>
+                <div style={{ borderTop: `2px solid ${accent}40`, paddingTop: '1rem', flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
+                  {loading ? (
+                    <p style={{ color: 'var(--text-secondary)' }}>Loading tasks…</p>
+                  ) : taskCount > 0 ? (
+                    tasksByStatus[status].map(task => (
+                      <KanbanCard key={task.task_id} task={task} onClick={() => setSelectedTask(task)} buildAssigneesLabel={buildAssigneesLabel} />
+                    ))
+                  ) : (
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', textAlign: 'center', paddingTop: '2rem' }}>
+                      No tasks in this column
+                    </div>
+                  )}
+                </div>
+              </KanbanDroppableColumn>
+            );
+          })}
+        </div>
+      </DndContext>
 
       {selectedTask && (
         <TaskDetailsModal

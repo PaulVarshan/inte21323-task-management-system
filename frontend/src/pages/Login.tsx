@@ -22,7 +22,7 @@ export const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post('/login', { email, password });
+      const response = await api.post('/login', { email, password, role });
       const { user } = response.data;
       
       login(user);

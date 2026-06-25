@@ -1,17 +1,26 @@
 import prisma from "../config/prisma";
 import fs from "fs";
 import path from "path";
+import { createNotification } from "./notification.service";
 
 export const createAttachment = async (userId: number, taskId: number, filename: string, fileUrl: string) => {
   // Verify task exists
   const task = await prisma.task.findUnique({
-    where: { task_id: taskId }
+    where: { task_id: taskId },
+    include: {
+      assignees: true,
+      project: {
+        select: {
+          created_by: true
+        }
+      }
+    }
   });
   if (!task) {
     throw new Error("Task not found");
   }
 
-  return prisma.attachment.create({
+  const attachment = await prisma.attachment.create({
     data: {
       file_name: filename,
       uploaded_by_user_id: userId,
@@ -28,6 +37,49 @@ export const createAttachment = async (userId: number, taskId: number, filename:
       }
     }
   });
+
+  // --- Notifications ---
+  // Get all admins
+  const adminUsers = await prisma.user.findMany({
+    where: {
+      user_roles: {
+        some: {
+          role: {
+            role_name: "Admin"
+          }
+        }
+      }
+    }
+  });
+
+  const notifyUserIds = new Set<number>();
+  
+  // 1. Task assignees
+  task.assignees.forEach(a => notifyUserIds.add(a.user_id));
+  
+  // 2. Project Manager (creator of the project)
+  if (task.project?.created_by) {
+    notifyUserIds.add(task.project.created_by);
+  }
+  
+  // 3. Admins
+  adminUsers.forEach(admin => notifyUserIds.add(admin.user_id));
+
+  // Remove the user who uploaded the document so they don't notify themselves
+  notifyUserIds.delete(userId);
+
+  // Send notifications
+  const notifyPromises = Array.from(notifyUserIds).map(id =>
+    createNotification(
+      id,
+      "New Document Uploaded",
+      `A new document "${filename}" was added to task "${task.title}".`,
+      "document"
+    )
+  );
+  await Promise.all(notifyPromises);
+
+  return attachment;
 };
 
 export const getTaskAttachments = async (taskId: number) => {
@@ -75,4 +127,47 @@ export const deleteAttachment = async (attachmentId: number, userId: number, rol
   });
 
   return { success: true, message: "Attachment deleted successfully" };
+};
+
+export const getAllAttachments = async (userId: number, role: string) => {
+  let projectFilter: any = {};
+  let taskFilter: any = {};
+
+  if (role === "Admin") {
+    // Admin sees all
+  } else if (role === "Project Manager") {
+    projectFilter = {
+      OR: [
+        { created_by: userId },
+        { team_members: { some: { user_id: userId } } }
+      ]
+    };
+    taskFilter = { project: projectFilter };
+  } else if (role === "Collaborator") {
+    taskFilter = { assignees: { some: { user_id: userId } } };
+  }
+
+  const whereClause = role === "Admin" ? {} : { task: taskFilter };
+
+  return prisma.attachment.findMany({
+    where: whereClause,
+    orderBy: { uploaded_at: "desc" },
+    include: {
+      user: {
+        select: {
+          username: true
+        }
+      },
+      task: {
+        select: {
+          title: true,
+          project: {
+            select: {
+              project_name: true
+            }
+          }
+        }
+      }
+    }
+  });
 };

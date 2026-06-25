@@ -526,8 +526,57 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ taskId, isOp
                   </div>
                 </div>
 
-                {/* Attachments Section Removed */}
+                {/* Attachments Section */}
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: 600 }}>Attachments</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <input 
+                        type="file" 
+                        id="file-upload-input"
+                        onChange={handleFileChange}
+                        style={{ display: 'none' }}
+                        accept=".pdf,.docx,.png,.jpg,.jpeg"
+                      />
+                      <Button 
+                        onClick={() => document.getElementById('file-upload-input')?.click()}
+                        style={{ padding: '0.5rem 1rem', background: 'var(--bg-gradient)', border: '1px dashed var(--primary-color)', color: 'var(--primary-color)' }}
+                      >
+                        {selectedFile ? selectedFile.name : 'Choose File...'}
+                      </Button>
+                      <Button 
+                        onClick={handleUploadFile}
+                        disabled={!selectedFile || uploading}
+                        style={{ padding: '0.5rem 1rem' }}
+                      >
+                        {uploading ? 'Uploading...' : 'Upload'}
+                      </Button>
+                    </div>
 
+                    {attachments.length === 0 ? (
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontStyle: 'italic' }}>
+                        No attachments.
+                      </p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                        {attachments.map(a => (
+                          <div key={a.attachment_id} style={{
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            padding: '0.5rem', background: 'var(--bg-gradient)', border: '1px solid var(--surface-border)', borderRadius: '4px'
+                          }}>
+                            <a href={a.file_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: 'var(--text-primary)', fontSize: '0.9rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={a.file_name}>
+                              <span style={{ fontSize: '1.25rem' }}>{getFileIcon(a.file_name)}</span>
+                              {a.file_name}
+                            </a>
+                            {(a.uploaded_by_user_id === currentUser?.user_id || currentUser?.role === 'Admin') && (
+                              <button onClick={() => handleDeleteAttachment(a.attachment_id)} style={{ background: 'none', border: 'none', color: 'var(--error-color)', cursor: 'pointer', fontSize: '1.1rem' }}>&times;</button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
             </div>

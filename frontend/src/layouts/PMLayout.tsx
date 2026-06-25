@@ -13,8 +13,8 @@ export const PMLayout = () => {
         { path: '/pm/tasks/kanban', label: '⊞  Kanban Board' },
       ]
     },
-  //  { path: '/pm/tasks/kanban', label: 'Kanban Board' },
-
+    { path: '/pm/tasks/kanban', label: 'Kanban Board' },
+    { path: '/pm/attachments', label: 'Attachments' },
     { path: '/pm/notifications', label: 'Notifications' },
   ];
 
