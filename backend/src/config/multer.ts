@@ -1,21 +1,24 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { S3Client } from "@aws-sdk/client-s3";
+import multerS3 from "multer-s3";
 
-// Storage directory
-const uploadDir = path.join(process.cwd(), "uploads");
-
-// Create directory if not exists
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
+export const s3Config = new S3Client({
+  region: process.env.S3_REGION || "ap-northeast-1",
+  endpoint: process.env.S3_ENDPOINT || "https://vyxunfpwynglcmqdalto.storage.supabase.co/storage/v1/s3",
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || ""
   },
-  filename: (req, file, cb) => {
-    // Generate unique name: timestamp + random + original extension
+  forcePathStyle: true
+});
+
+const storage = multerS3({
+  s3: s3Config,
+  bucket: process.env.S3_BUCKET_NAME || "task-attachments",
+  contentType: multerS3.AUTO_CONTENT_TYPE,
+  key: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const ext = path.extname(file.originalname);
     cb(null, file.fieldname + "-" + uniqueSuffix + ext);

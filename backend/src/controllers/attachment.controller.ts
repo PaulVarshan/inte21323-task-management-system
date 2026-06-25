@@ -19,13 +19,14 @@ export const uploadAttachment = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ success: false, message: "No file uploaded or file type not allowed" });
     }
 
-    // Build URL to access file statically
-    const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    // With multer-s3, the S3 URL is stored in req.file.location, and the filename in req.file.key
+    const fileUrl = (req.file as any).location || `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    const filename = (req.file as any).key || req.file.filename;
 
     const attachment = await attachmentService.createAttachment(
       userId,
       taskId,
-      req.file.filename,
+      filename,
       fileUrl
     );
 

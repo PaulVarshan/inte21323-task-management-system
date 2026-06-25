@@ -10,8 +10,13 @@ import attachmentRoutes from "./routes/attachment.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import notificationRoutes from "./routes/notification.routes";
 import userRoutes from "./routes/user.routes";
+import helmet from "helmet";
 
 const app = express();
+
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
 
 app.use(cors({
   origin: [
