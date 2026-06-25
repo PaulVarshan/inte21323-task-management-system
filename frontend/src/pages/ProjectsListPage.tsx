@@ -64,18 +64,18 @@ export const ProjectsListPage: React.FC = () => {
 
         {error && <div className="error-message">{error}</div>}
 
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+        <div className="form-row" style={{ marginBottom: '2rem' }}>
           <input 
             type="text" 
             placeholder="Search projects..." 
             className="input-field" 
-            style={{ marginBottom: 0, flex: 1 }}
+            style={{ marginBottom: 0, flex: 2 }}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           <select 
             className="input-field" 
-            style={{ marginBottom: 0, width: '200px' }}
+            style={{ marginBottom: 0, flex: 1 }}
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
