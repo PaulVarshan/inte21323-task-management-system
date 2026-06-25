@@ -11,6 +11,8 @@ import dashboardRoutes from "./routes/dashboard.routes";
 import notificationRoutes from "./routes/notification.routes";
 import userRoutes from "./routes/user.routes";
 import helmet from "helmet";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger";
 
 const app = express();
 
@@ -31,6 +33,9 @@ app.use(cookieParser());
 
 // Serve static uploads
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+// Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);

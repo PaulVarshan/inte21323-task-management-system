@@ -28,7 +28,7 @@ export interface User {
 }
 
 export const createUser = async (data: { username: string; email: string; role: string }) => {
-  const response = await userApi.post('/', data);
+  const response = await userApi.post('/users', data);
   return response.data.data as User;
 };
 
