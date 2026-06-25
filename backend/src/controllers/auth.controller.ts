@@ -4,9 +4,23 @@ import bcrypt from "bcrypt";
 import { registerUser, loginUser } from "../services/auth.service";
 import { sendResetEmail } from "../utils/email";
 
+const validatePassword = (password: string): string | null => {
+  if (password.length < 8) return "Password must be at least 8 characters long";
+  if (!/[A-Z]/.test(password)) return "Password must contain at least 1 uppercase letter";
+  if (!/[a-z]/.test(password)) return "Password must contain at least 1 lowercase letter";
+  if (!/[0-9]/.test(password)) return "Password must contain at least 1 number";
+  if (!/[^A-Za-z0-9]/.test(password)) return "Password must contain at least 1 special character";
+  return null;
+};
+
 export const register = async (req: Request, res: Response) => {
     try {
         const { username, email, password } = req.body;
+
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+            return res.status(400).json({ success: false, message: passwordError });
+        }
 
         const user = await registerUser(
             username,
@@ -263,6 +277,11 @@ export const resetPassword = async (req: Request, res: Response) => {
 
     if (!email || !otp || !newPassword) {
       return res.status(400).json({ success: false, message: "Email, OTP, and new password are required" });
+    }
+
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+      return res.status(400).json({ success: false, message: passwordError });
     }
 
     const user = await prisma.user.findFirst({

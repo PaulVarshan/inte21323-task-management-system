@@ -39,9 +39,58 @@ export const sendResetEmail = async (toEmail: string, otpCode: string) => {
       throw new Error("Failed to send reset email");
     }
 
-    return await response.json();
+    console.log("Reset email sent successfully");
   } catch (error) {
-    console.error("Error sending email:", error);
-    throw error;
+    console.error("Error sending reset email:", error);
+    throw new Error("Failed to send reset email");
+  }
+};
+
+export const sendWelcomeEmail = async (to: string, username: string, plainTextPassword: string) => {
+  try {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: { email: "paulvarshan2004@gmail.com", name: "Task Management System" },
+        to: [{ email: to }],
+        subject: "Welcome to Task Management System - Your Account Details",
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #0ea5e9; padding: 20px; text-align: center;">
+              <h1 style="color: white; margin: 0;">Welcome to Task Management System!</h1>
+            </div>
+            <div style="padding: 30px; background-color: #ffffff;">
+              <p style="font-size: 16px; color: #333;">Hello <strong>${username}</strong>,</p>
+              <p style="font-size: 16px; color: #333;">An administrator has created an account for you. Below are your temporary login credentials:</p>
+              
+              <div style="background-color: #f8fafc; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0;">
+                <p style="margin: 5px 0; font-size: 16px;"><strong>Email:</strong> ${to}</p>
+                <p style="margin: 5px 0; font-size: 16px;"><strong>Password:</strong> ${plainTextPassword}</p>
+              </div>
+              
+              <p style="font-size: 16px; color: #333; margin-top: 20px;">For your security, we highly recommend that you log in and change your password immediately.</p>
+              
+              <div style="text-align: center; margin-top: 30px;">
+                <a href="${process.env.FRONTEND_URL}/login" style="background-color: #0ea5e9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">Log In Now</a>
+              </div>
+            </div>
+            <div style="background-color: #f8fafc; padding: 15px; text-align: center; color: #64748b; font-size: 14px;">
+              <p style="margin: 0;">If you have any questions, please contact your system administrator.</p>
+            </div>
+          </div>
+        `
+      })
+    });
+    
+    if (!response.ok) throw new Error("Failed to send welcome email");
+    console.log("Welcome email sent successfully");
+  } catch (error) {
+    console.error("Error sending welcome email:", error);
+    throw new Error("Failed to send welcome email");
   }
 };
