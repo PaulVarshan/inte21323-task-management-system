@@ -111,7 +111,7 @@ export const TeamsListPage: React.FC = () => {
 
         {error && <div className="error-message">{error}</div>}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
           {projects.length === 0 ? (
             <div style={{ color: 'var(--text-secondary)' }}>No projects found.</div>
           ) : (
@@ -130,7 +130,7 @@ export const TeamsListPage: React.FC = () => {
                 onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
                 onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
               >
-                <h3 style={{ marginBottom: '0.5rem' }}>{project.project_name}</h3>
+                <h3 style={{ marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch' }} title={project.project_name}>{project.project_name}</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
                   {getProjectMembers(project.project_id).length} Team Members
                 </p>
@@ -176,7 +176,9 @@ export const TeamsListPage: React.FC = () => {
               }}
             >&times;</button>
             
-            <h2 style={{ marginBottom: '1.5rem' }}>Team: {selectedProject.project_name}</h2>
+            <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+              Team: <span style={{ marginLeft: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block' }} title={selectedProject.project_name}>{selectedProject.project_name}</span>
+            </h2>
             
             <div style={{ overflowY: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
@@ -236,7 +238,7 @@ export const TeamsListPage: React.FC = () => {
               </table>
             </div>
 
-            <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', width: '100%' }}>
+            <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
               <select
                 className="input-field"
                 value={selectedUserToAdd}
@@ -247,7 +249,7 @@ export const TeamsListPage: React.FC = () => {
                     handleAddMember(selectedProject.project_id, Number(val));
                   }
                 }}
-                style={{ flex: 1, padding: '0.75rem', height: 'auto', background: 'var(--primary-color)', color: '#fff', border: 'none', cursor: 'pointer' }}
+                style={{ width: '100%', padding: '0.75rem 1rem', background: 'var(--primary-color)', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: '8px', fontSize: '1rem', fontWeight: 500, marginBottom: 0 }}
                 disabled={addingMember}
               >
                 <option value="" disabled>{addingMember ? 'Adding...' : 'Add member...'}</option>
@@ -260,7 +262,7 @@ export const TeamsListPage: React.FC = () => {
                   ))
                 }
               </select>
-              <Button style={{ flex: 1, background: '#fff', color: 'var(--text-primary)', border: '1px solid var(--surface-border)' }} onClick={() => setSelectedProject(null)}>Close</Button>
+              <Button style={{ width: '100%', background: 'var(--surface-color)', color: 'var(--text-primary)', border: '1px solid var(--surface-border)' }} onClick={() => setSelectedProject(null)}>Close</Button>
             </div>
           </div>
         </div>

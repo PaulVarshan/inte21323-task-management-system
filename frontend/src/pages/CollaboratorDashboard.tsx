@@ -6,7 +6,6 @@ import {
   getTaskStatus, 
   getOverdueTasks, 
   getUpcomingDeadlines, 
-  getTeamWorkload, 
   getRecentTasks 
 } from '../services/dashboard.service';
 import type { 
@@ -15,7 +14,6 @@ import type {
   TaskStatusCounts, 
   OverdueTaskData, 
   UpcomingDeadlinesData, 
-  TeamWorkloadData, 
   RecentTaskData 
 } from '../services/dashboard.service';
 import { OverviewCards } from '../components/dashboard/OverviewCards';
@@ -23,12 +21,10 @@ import { ProjectProgress } from '../components/dashboard/ProjectProgress';
 import { TaskStatusOverview } from '../components/dashboard/TaskStatusOverview';
 import { OverdueTasks } from '../components/dashboard/OverdueTasks';
 import { UpcomingDeadlines } from '../components/dashboard/UpcomingDeadlines';
-import { TeamWorkload } from '../components/dashboard/TeamWorkload';
 import { RecentTasks } from '../components/dashboard/RecentTasks';
-import { QuickActions } from '../components/dashboard/QuickActions';
 import { TaskDetailsModal } from '../components/TaskDetailsModal';
 
-export const PMDashboard: React.FC = () => {
+export const CollaboratorDashboard: React.FC = () => {
   const { user } = useAuth();
   
   const [stats, setStats] = useState<OverviewStats | null>(null);
@@ -36,7 +32,6 @@ export const PMDashboard: React.FC = () => {
   const [taskStatus, setTaskStatus] = useState<TaskStatusCounts | null>(null);
   const [overdueTasks, setOverdueTasks] = useState<OverdueTaskData[]>([]);
   const [upcomingDeadlines, setUpcomingDeadlines] = useState<UpcomingDeadlinesData | null>(null);
-  const [teamWorkload, setTeamWorkload] = useState<TeamWorkloadData[]>([]);
   const [recentTasks, setRecentTasks] = useState<RecentTaskData[]>([]);
   
   const [loading, setLoading] = useState(true);
@@ -55,7 +50,6 @@ export const PMDashboard: React.FC = () => {
         statusData,
         overdueData,
         deadlinesData,
-        workloadData,
         recentData
       ] = await Promise.all([
         getOverview(),
@@ -63,7 +57,6 @@ export const PMDashboard: React.FC = () => {
         getTaskStatus(),
         getOverdueTasks(),
         getUpcomingDeadlines(),
-        getTeamWorkload(),
         getRecentTasks()
       ]);
       setStats(statsData);
@@ -71,7 +64,6 @@ export const PMDashboard: React.FC = () => {
       setTaskStatus(statusData);
       setOverdueTasks(overdueData);
       setUpcomingDeadlines(deadlinesData);
-      setTeamWorkload(workloadData);
       setRecentTasks(recentData);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to retrieve dashboard analytics');
@@ -84,7 +76,7 @@ export const PMDashboard: React.FC = () => {
     fetchDashboardData();
   }, []);
 
-  if (loading) return <div className="page-container">Loading Dashboard Analytics...</div>;
+  if (loading) return <div className="page-container">Loading My Dashboard...</div>;
 
   return (
     <div className="dashboard-container" style={{ padding: '0', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -105,6 +97,9 @@ export const PMDashboard: React.FC = () => {
         <OverdueTasks tasks={overdueTasks} onTaskClick={setSelectedTaskId} />
         {upcomingDeadlines && <UpcomingDeadlines deadlines={upcomingDeadlines} onTaskClick={setSelectedTaskId} />}
       </div>
+
+      {/* Row 4: Recent Tasks */}
+      <RecentTasks tasks={recentTasks} onTaskClick={setSelectedTaskId} />
 
       {/* Integrated Part 5 task details widget modal */}
       {selectedTaskId && (

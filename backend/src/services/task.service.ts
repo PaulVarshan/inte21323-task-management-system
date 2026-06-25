@@ -126,6 +126,12 @@ export const getTaskById = async (taskId: number, userId: number, role: string) 
 export const updateTask = async (taskId: number, data: any, userId: number, role: string) => {
   const task = await getTaskById(taskId, userId, role);
 
+  if (data.status && data.status !== task.status) {
+    if (role === "Collaborator" && data.status === "DONE") {
+      throw new Error("Collaborators cannot mark tasks as DONE");
+    }
+  }
+
   // Check update permissions (Creator, Admin, PM, INCHARGE, or Assignee updating status)
   let canEditFull = false;
   let canEditStatus = false;
@@ -157,20 +163,7 @@ export const updateTask = async (taskId: number, data: any, userId: number, role
     });
 
     if (data.status && data.status !== task.status) {
-      // Notify creator, assignees, and project manager
-      const notifyUsers = new Set<number>();
-      if (task.created_by !== userId) notifyUsers.add(task.created_by);
-      if (task.project.created_by !== userId) notifyUsers.add(task.project.created_by);
-      task.assignees.forEach(a => { if (a.user_id !== userId) notifyUsers.add(a.user_id); });
-      
-      for (const uid of notifyUsers) {
-        await createNotification(
-          uid,
-          "Task Status Updated",
-          `Status of task "${task.title}" changed to ${data.status}`,
-          "TASK_STATUS_CHANGED"
-        );
-      }
+      await handleStatusNotifications(task, data.status, userId, task.title);
     }
     const finalTask = await getTaskById(taskId, userId, role);
     getIO().emit("task-updated", finalTask);
@@ -218,20 +211,7 @@ export const updateTask = async (taskId: number, data: any, userId: number, role
   }
 
   if (data.status && data.status !== task.status) {
-    // Notify creator, assignees, and project manager about status change
-    const notifyUsers = new Set<number>();
-    if (task.created_by !== userId) notifyUsers.add(task.created_by);
-    if (task.project.created_by !== userId) notifyUsers.add(task.project.created_by);
-    task.assignees.forEach(a => { if (a.user_id !== userId) notifyUsers.add(a.user_id); });
-    
-    for (const uid of notifyUsers) {
-      await createNotification(
-        uid,
-        "Task Status Updated",
-        `Status of task "${updatedTask.title}" changed to ${data.status}`,
-        "TASK_STATUS_CHANGED"
-      );
-    }
+    await handleStatusNotifications(task, data.status, userId, updatedTask.title);
   }
 
   const finalTask = await getTaskById(taskId, userId, role);
@@ -271,4 +251,44 @@ export const deleteTask = async (taskId: number, userId: number, role: string) =
   return prisma.task.delete({
     where: { task_id: taskId }
   });
+};
+
+const handleStatusNotifications = async (task: any, newStatus: string, userId: number, taskTitle: string) => {
+  const adminUsers = await prisma.user.findMany({
+    where: { user_roles: { some: { role: { role_name: "Admin" } } } }
+  });
+
+  const notifyUsers = new Set<number>();
+
+  if (newStatus === "REVIEW") {
+    if (task.project.created_by !== userId) notifyUsers.add(task.project.created_by);
+    adminUsers.forEach(admin => { if (admin.user_id !== userId) notifyUsers.add(admin.user_id) });
+    for (const uid of notifyUsers) {
+      await createNotification(uid, "Task Review Requested", `Task "${taskTitle}" is ready for review`, "TASK_REVIEW");
+    }
+  } else if (task.status === "REVIEW" && newStatus === "IN_PROGRESS") {
+    task.assignees.forEach(a => { if (a.user_id !== userId) notifyUsers.add(a.user_id) });
+    for (const uid of notifyUsers) {
+      await createNotification(uid, "Task Rejected", `Task "${taskTitle}" was moved back to IN PROGRESS`, "TASK_REJECTED");
+    }
+  } else if (newStatus === "DONE") {
+    task.assignees.forEach(a => { if (a.user_id !== userId) notifyUsers.add(a.user_id) });
+    adminUsers.forEach(admin => { if (admin.user_id !== userId) notifyUsers.add(admin.user_id) });
+    for (const uid of notifyUsers) {
+      await createNotification(uid, "Task Approved", `Task "${taskTitle}" has been marked as DONE`, "TASK_APPROVED");
+    }
+  } else {
+    if (task.created_by !== userId) notifyUsers.add(task.created_by);
+    if (task.project.created_by !== userId) notifyUsers.add(task.project.created_by);
+    task.assignees.forEach(a => { if (a.user_id !== userId) notifyUsers.add(a.user_id); });
+    
+    for (const uid of notifyUsers) {
+      await createNotification(
+        uid,
+        "Task Status Updated",
+        `Status of task "${taskTitle}" changed to ${newStatus}`,
+        "TASK_STATUS_CHANGED"
+      );
+    }
+  }
 };

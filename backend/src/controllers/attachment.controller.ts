@@ -85,3 +85,30 @@ export const deleteAttachment = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ success: false, message: error.message || "Failed to delete attachment" });
   }
 };
+
+export const getAllAttachments = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = parseInt(req.user.userId as string);
+    const role = req.user.role as string;
+
+    const attachments = await attachmentService.getAllAttachments(userId, role);
+
+    const formattedAttachments = attachments.map(a => ({
+      attachment_id: a.attachment_id,
+      file_name: a.file_name,
+      file_url: a.file_url,
+      uploaded_at: a.uploaded_at,
+      uploaded_by: a.user?.username || "Unknown",
+      task_name: a.task?.title || "Unknown Task",
+      project_name: a.task?.project?.project_name || "Unknown Project"
+    }));
+
+    return res.status(200).json({
+      success: true,
+      message: "All attachments retrieved successfully",
+      data: formattedAttachments
+    });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message || "Failed to retrieve attachments" });
+  }
+};

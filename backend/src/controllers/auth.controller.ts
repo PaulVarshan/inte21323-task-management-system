@@ -27,9 +27,15 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
     // Normal login only allows Collaborator and Project Manager
-    const allowedRoles = ["Collaborator", "Project Manager"];
+    let allowedRoles = ["Collaborator", "Project Manager"];
+    
+    // If a specific role was requested from the UI dropdown, restrict login to that role
+    if (role && allowedRoles.includes(role)) {
+      allowedRoles = [role];
+    }
+    
     const result = await loginUser(email, password, allowedRoles);
     
     // Set HttpOnly cookies

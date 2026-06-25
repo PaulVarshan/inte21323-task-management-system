@@ -27,6 +27,12 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     navigate(`${basePath}/notifications`);
   };
 
+  const getNotificationColor = (type: string) => {
+    if (type === 'TASK_REVIEW' || type === 'TASK_APPROVED') return { r: 34, g: 197, b: 94 };
+    if (type === 'TASK_REJECTED') return { r: 239, g: 68, b: 68 };
+    return { r: 59, g: 130, b: 246 };
+  };
+
   return (
     <div style={{
       position: 'absolute',
@@ -37,7 +43,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       maxHeight: '400px',
       overflowY: 'auto',
       background: 'var(--surface-color)',
-      border: '1px solid rgba(255,255,255,0.1)',
+      border: '1px solid var(--surface-border)',
       borderRadius: '12px',
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
       zIndex: 1000,
@@ -46,7 +52,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     }}>
       <div style={{
         padding: '1rem',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        borderBottom: '1px solid var(--surface-border)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
@@ -74,20 +80,27 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             No notifications
           </div>
         ) : (
-          notifications.slice(0, 5).map(notification => (
+          notifications.slice(0, 5).map(notification => {
+            const { r, g, b } = getNotificationColor(notification.notification_type || '');
+            return (
             <div 
               key={notification.notification_id}
               onClick={() => !notification.is_read && onMarkAsRead(notification.notification_id)}
               style={{
                 padding: '1rem',
-                borderBottom: '1px solid rgba(255,255,255,0.05)',
-                background: notification.is_read ? 'transparent' : 'rgba(74, 144, 226, 0.1)',
+                margin: '0.5rem',
+                border: '1px solid var(--surface-border)',
+                borderRadius: '8px',
+                background: notification.is_read ? 'var(--surface-color)' : `rgba(${r}, ${g}, ${b}, 0.08)`,
                 cursor: notification.is_read ? 'default' : 'pointer',
                 transition: 'background 0.2s'
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                <strong style={{ fontSize: '0.95rem' }}>{notification.title}</strong>
+                <strong style={{ fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  {!notification.is_read && <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: `rgb(${r}, ${g}, ${b})`, flexShrink: 0 }} />}
+                  {notification.title}
+                </strong>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                   {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                 </span>
@@ -96,7 +109,8 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                 {notification.message}
               </p>
             </div>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -107,8 +121,8 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             padding: '1rem',
             background: 'none',
             border: 'none',
-            borderTop: '1px solid rgba(255,255,255,0.1)',
-            color: '#fff',
+            borderTop: '1px solid var(--surface-border)',
+            color: 'var(--primary-color)',
             cursor: 'pointer',
             fontWeight: '600'
           }}

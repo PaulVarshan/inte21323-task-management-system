@@ -48,12 +48,24 @@ export const NotificationsPage: React.FC = () => {
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
+  const getNotificationColor = (type: string) => {
+    if (type === 'TASK_REVIEW' || type === 'TASK_APPROVED') {
+      return { r: 34, g: 197, b: 94 }; // Green
+    }
+    if (type === 'TASK_REJECTED') {
+      return { r: 239, g: 68, b: 68 }; // Red
+    }
+    return { r: 59, g: 130, b: 246 }; // Blue (default)
+  };
+
   return (
-    <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', margin: 0 }}>Notifications</h1>
+    <div className="dashboard-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <div className="header-actions" style={{ marginBottom: '2rem' }}>
+        <h1 style={{ margin: 0 }}>Notifications</h1>
         {unreadCount > 0 && (
-          <Button onClick={handleMarkAllAsRead}>Mark all as read</Button>
+          <div>
+            <Button onClick={handleMarkAllAsRead} style={{ whiteSpace: 'nowrap' }}>Mark all as read</Button>
+          </div>
         )}
       </div>
 
@@ -64,36 +76,42 @@ export const NotificationsPage: React.FC = () => {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {notifications.map(notification => (
+            {notifications.map(notification => {
+              const { r, g, b } = getNotificationColor(notification.notification_type || '');
+              return (
               <div 
                 key={notification.notification_id}
                 onClick={() => !notification.is_read && handleMarkAsRead(notification.notification_id)}
                 style={{
-                  padding: '1.5rem',
-                  borderRadius: '8px',
-                  background: notification.is_read ? 'rgba(255,255,255,0.02)' : 'rgba(74, 144, 226, 0.1)',
-                  border: '1px solid rgba(255,255,255,0.05)',
+                  padding: '1.25rem',
+                  borderRadius: '12px',
+                  background: notification.is_read ? 'var(--bg-gradient)' : `rgba(${r}, ${g}, ${b}, 0.08)`,
+                  border: notification.is_read ? '1px solid var(--surface-border)' : `1px solid rgba(${r}, ${g}, ${b}, 0.4)`,
+                  boxShadow: notification.is_read ? 'none' : `0 4px 12px rgba(${r}, ${g}, ${b}, 0.1)`,
                   cursor: notification.is_read ? 'default' : 'pointer',
-                  transition: 'transform 0.2s, background 0.2s',
+                  transition: 'all 0.2s ease',
                   display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '1rem',
                   justifyContent: 'space-between',
-                  alignItems: 'flex-start'
+                  alignItems: 'center'
                 }}
               >
-                <div>
-                  <h3 style={{ margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    {!notification.is_read && <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary-color)' }} />}
-                    {notification.title}
+                <div style={{ flex: '1 1 250px', minWidth: 0 }}>
+                  <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    {!notification.is_read && <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: `rgb(${r}, ${g}, ${b})`, flexShrink: 0, boxShadow: `0 0 8px rgb(${r}, ${g}, ${b})` }} />}
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{notification.title}</span>
                   </h3>
-                  <p style={{ margin: '0', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                  <p style={{ margin: '0', color: 'var(--text-secondary)', lineHeight: 1.5, fontSize: '0.95rem' }}>
                     {notification.message}
                   </p>
                 </div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', whiteSpace: 'nowrap', fontWeight: 500 }}>
                   {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

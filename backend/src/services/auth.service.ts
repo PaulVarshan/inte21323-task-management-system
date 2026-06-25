@@ -89,7 +89,7 @@ export const loginUser = async (
   else if (allowedRoles.includes("Collaborator") && roleNames.includes("Collaborator")) roleName = "Collaborator";
 
   if (!roleName) {
-    throw new Error("Unauthorized role for this login portal");
+    throw new Error("Invalid credentials");
   }
 
   const accessToken = generateAccessToken(

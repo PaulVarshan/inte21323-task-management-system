@@ -172,7 +172,7 @@ export const EditTaskPage: React.FC = () => {
 
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
             <Link to="../.." relative="path" style={{ flex: 1 }}>
-              <Button type="button" style={{ width: '100%', background: 'var(--surface-color)' }}>Cancel</Button>
+              <Button type="button" style={{ width: '100%', background: '#e5e7eb', color: 'var(--text-primary)' }}>Cancel</Button>
             </Link>
             <Button type="submit" style={{ flex: 1 }} disabled={submitting}>
               {submitting ? 'Saving...' : 'Save Changes'}

@@ -95,18 +95,20 @@ export const TasksListPage: React.FC = () => {
   return (
     <div className="dashboard-container">
       <div className="glass-panel" style={{ padding: '2rem', position: 'relative' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h1>Project Tasks</h1>
+        <div className="header-actions">
+          <h1 style={{ margin: 0 }}>Project Tasks</h1>
           {currentUser?.role !== 'Collaborator' && (
-            <Link to="new">
-              <Button>Create Task</Button>
-            </Link>
+            <div>
+              <Link to="new">
+                <Button style={{ whiteSpace: 'nowrap' }}>Create Task</Button>
+              </Link>
+            </div>
           )}
         </div>
 
         {error && <div className="error-message">{error}</div>}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
           {projects.length === 0 ? (
             <div style={{ color: 'var(--text-secondary)' }}>No projects found.</div>
           ) : (
@@ -125,7 +127,7 @@ export const TasksListPage: React.FC = () => {
                 onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
                 onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
               >
-                <h3 style={{ marginBottom: '0.5rem' }}>{project.project_name}</h3>
+                <h3 style={{ marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch' }} title={project.project_name}>{project.project_name}</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
                   {getProjectTasks(project.project_id).length} Tasks
                 </p>
@@ -171,9 +173,11 @@ export const TasksListPage: React.FC = () => {
               }}
             >&times;</button>
             
-            <h2 style={{ marginBottom: '1.5rem' }}>Tasks: {selectedProject.project_name}</h2>
+            <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+              Tasks: <span style={{ marginLeft: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block' }} title={selectedProject.project_name}>{selectedProject.project_name}</span>
+            </h2>
             
-            <div style={{ overflowY: 'auto' }}>
+            <div style={{ overflowX: 'auto', overflowY: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
@@ -212,7 +216,11 @@ export const TasksListPage: React.FC = () => {
                             {task.title}
                           </button>
                         </td>
-                        <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{task.project?.project_name}</td>
+                        <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '14ch', display: 'inline-block', verticalAlign: 'bottom' }} title={task.project?.project_name}>
+                            {task.project?.project_name}
+                          </span>
+                        </td>
                         <td style={{ padding: '1rem' }}>
                           <span style={{ color: getPriorityColor(task.priority), fontWeight: 'bold', fontSize: '0.9rem' }}>
                             {task.priority}
@@ -330,13 +338,13 @@ export const TasksListPage: React.FC = () => {
               </table>
             </div>
 
-            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+            <div className="form-row" style={{ marginTop: '2rem' }}>
               {currentUser?.role !== 'Collaborator' && (
-                <Link to="new">
-                  <Button>Create Task</Button>
+                <Link to="new" style={{ flex: 1, display: 'flex' }}>
+                  <Button style={{ width: '100%', height: '100%' }}>Create Task</Button>
                 </Link>
               )}
-              <Button style={{ background: 'var(--surface-color)' }} onClick={() => setSelectedProject(null)}>Close</Button>
+              <Button style={{ flex: 1, background: 'var(--surface-color)', color: 'var(--text-primary)', border: '1px solid var(--surface-border)' }} onClick={() => setSelectedProject(null)}>Close</Button>
             </div>
           </div>
         </div>

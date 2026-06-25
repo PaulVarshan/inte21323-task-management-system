@@ -29,25 +29,25 @@ export const TaskStatusOverview: React.FC<TaskStatusOverviewProps> = ({ statusCo
         Tasks by Status
       </h3>
       
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
         {statuses.map((stat, idx) => (
           <div
             key={idx}
             style={{
-              padding: '1.25rem',
+              padding: '1rem',
               background: '#f9fafb',
               border: '1px solid var(--surface-border)',
               borderRadius: '16px',
               display: 'flex',
               alignItems: 'center',
-              gap: '1rem',
+              gap: '0.75rem',
               transition: 'transform 0.2s',
             }}
             onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
             onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
           >
             <div style={{
-              width: '42px', height: '42px',
+              width: '38px', height: '38px',
               borderRadius: '12px',
               backgroundColor: stat.tint,
               display: 'flex', alignItems: 'center', justifyContent: 'center'
@@ -55,10 +55,10 @@ export const TaskStatusOverview: React.FC<TaskStatusOverviewProps> = ({ statusCo
               {stat.icon}
             </div>
             <div>
-              <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500, marginBottom: '0.25rem' }}>
+              <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500, marginBottom: '0.25rem' }}>
                 {stat.label}
               </span>
-              <strong style={{ fontSize: '1.5rem', color: stat.color, lineHeight: 1 }}>
+              <strong style={{ fontSize: '1.35rem', color: stat.color, lineHeight: 1 }}>
                 {stat.count}
               </strong>
             </div>
