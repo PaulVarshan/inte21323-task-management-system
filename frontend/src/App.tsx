@@ -65,7 +65,7 @@ function App() {
           <Route path="tasks/edit/:id" element={<EditTaskPage />} />
           <Route path="tasks/kanban" element={<KanbanBoard />} />
 
-          <Route path="reports" element={<ComingSoonPage title="System Reports" />} />
+
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="" element={<Navigate to="dashboard" replace />} />
         </Route>
@@ -87,7 +87,7 @@ function App() {
           <Route path="tasks/edit/:id" element={<EditTaskPage />} />
           <Route path="tasks/kanban" element={<KanbanBoard />} />
 
-          <Route path="reports" element={<ComingSoonPage title="Project Reports" />} />
+
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="" element={<Navigate to="dashboard" replace />} />
         </Route>

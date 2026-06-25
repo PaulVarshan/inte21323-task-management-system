@@ -15,7 +15,7 @@ export const AdminLayout = () => {
       ]
     },
     { path: '/admin/tasks/kanban', label: 'Kanban Board' },
-    { path: '/admin/reports', label: 'Reports' },
+
     { path: '/admin/notifications', label: 'Notifications' },
   ];
 

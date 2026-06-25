@@ -14,7 +14,7 @@ export const PMLayout = () => {
       ]
     },
   //  { path: '/pm/tasks/kanban', label: 'Kanban Board' },
-    { path: '/pm/reports', label: 'Reports' },
+
     { path: '/pm/notifications', label: 'Notifications' },
   ];
 
