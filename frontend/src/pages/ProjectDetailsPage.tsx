@@ -25,6 +25,8 @@ export const ProjectDetailsPage: React.FC = () => {
   
   const [selectedUser, setSelectedUser] = useState('');
   const [selectedRole, setSelectedRole] = useState('MEMBER');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [addingMember, setAddingMember] = useState(false);
 
   const fetchData = async () => {
@@ -62,6 +64,8 @@ export const ProjectDetailsPage: React.FC = () => {
       await addMemberToProject(Number(id), Number(selectedUser), selectedRole);
       setSuccess('Member added successfully');
       setSelectedUser('');
+      setSearchQuery('');
+      setIsDropdownOpen(false);
       // Refresh members
       const updatedMembers = await getProjectMembers(Number(id));
       setMembers(updatedMembers);
@@ -90,6 +94,10 @@ export const ProjectDetailsPage: React.FC = () => {
 
   const isAdminOrCreator = currentUser?.role === 'Admin' || project.created_by === Number(currentUser?.user_id);
   const availableUsers = users.filter(u => u.role === 'Collaborator' && !members.some(m => m.user_id === u.user_id));
+  const filteredUsers = availableUsers.filter(u =>
+    u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="dashboard-container">
@@ -149,22 +157,107 @@ export const ProjectDetailsPage: React.FC = () => {
             <form onSubmit={handleAddMember} style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
               <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Add New Member</h3>
               <div className="form-row" style={{ alignItems: 'flex-end' }}>
-                <div style={{ flex: 2, width: '100%' }}>
+                <div style={{ flex: 3, width: '100%', position: 'relative' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>User</label>
-                  <select 
-                    className="input-field" 
-                    style={{ marginBottom: 0 }}
-                    value={selectedUser}
-                    onChange={(e) => setSelectedUser(e.target.value)}
-                    required
+                  
+                  {/* Custom Dropdown Trigger Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="input-field"
+                    style={{ 
+                      marginBottom: 0, 
+                      textAlign: 'left', 
+                      background: '#f9fafb', 
+                      color: 'var(--text-primary)', 
+                      border: '1px solid var(--surface-border)', 
+                      cursor: 'pointer',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
                   >
-                    <option value="">Select User...</option>
-                    {availableUsers.map(u => (
-                      <option key={u.user_id} value={u.user_id}>{u.username} ({u.email})</option>
-                    ))}
-                  </select>
+                    <span>
+                      {selectedUser 
+                        ? (users.find(u => String(u.user_id) === selectedUser)?.username + ' (' + users.find(u => String(u.user_id) === selectedUser)?.email + ')') 
+                        : 'Select User...'
+                      }
+                    </span>
+                    <span>{isDropdownOpen ? '▲' : '▼'}</span>
+                  </button>
+
+                  {/* Custom Searchable Dropdown Overlay */}
+                  {isDropdownOpen && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '100%',
+                      left: 0,
+                      right: 0,
+                      background: 'var(--surface-color)',
+                      border: '1px solid var(--surface-border)',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                      zIndex: 1100,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      maxHeight: '300px',
+                      padding: '0.5rem',
+                      marginBottom: '5px'
+                    }}>
+                      {/* User list */}
+                      <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '0.5rem', maxHeight: '200px' }}>
+                        {filteredUsers.map(u => (
+                          <div
+                            key={u.user_id}
+                            onClick={() => {
+                              setSelectedUser(String(u.user_id));
+                              setIsDropdownOpen(false);
+                            }}
+                            style={{
+                              padding: '0.6rem 0.8rem',
+                              cursor: 'pointer',
+                              borderRadius: '4px',
+                              transition: 'background 0.2s',
+                              fontSize: '0.9rem',
+                              color: 'var(--text-primary)',
+                              textAlign: 'left'
+                            }}
+                            onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                            onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+                          >
+                            {u.username} ({u.email})
+                          </div>
+                        ))}
+                        {filteredUsers.length === 0 && (
+                          <div style={{ padding: '0.6rem 0.8rem', color: 'var(--text-secondary)', fontSize: '0.9rem', textAlign: 'left' }}>
+                            No users found
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Search box at the bottom */}
+                      <div style={{ borderTop: '1px solid var(--surface-border)', paddingTop: '0.5rem' }}>
+                        <input
+                          type="text"
+                          placeholder="Search users..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="input-field"
+                          style={{ marginBottom: 0, background: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)' }}
+                          autoFocus
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Hidden required input for form validation */}
+                  <input 
+                    type="hidden" 
+                    value={selectedUser} 
+                    required 
+                  />
                 </div>
-                <div style={{ flex: 1, width: '100%' }}>
+                <div style={{ flex: 1.5, width: '100%' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Role</label>
                   <select 
                     className="input-field" 
@@ -176,9 +269,11 @@ export const ProjectDetailsPage: React.FC = () => {
                     <option value="INCHARGE">INCHARGE</option>
                   </select>
                 </div>
-                <Button type="submit" disabled={addingMember || availableUsers.length === 0} style={{ width: '100%' }}>
-                  {addingMember ? 'Adding...' : 'Add'}
-                </Button>
+                <div style={{ flex: 1, width: '100%' }}>
+                  <Button type="submit" disabled={addingMember || availableUsers.length === 0} style={{ width: '100%' }}>
+                    {addingMember ? 'Adding...' : 'Add'}
+                  </Button>
+                </div>
               </div>
             </form>
           )}
