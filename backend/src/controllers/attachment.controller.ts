@@ -26,7 +26,9 @@ export const uploadAttachment = async (req: AuthRequest, res: Response) => {
       // It's S3. Convert the internal S3 API endpoint to the public Object URL
       const bucket = process.env.S3_BUCKET_NAME || "task-attachments";
       const s3Endpoint = process.env.S3_ENDPOINT || "https://vyxunfpwynglcmqdalto.storage.supabase.co/storage/v1/s3";
-      const baseUrl = s3Endpoint.replace("/s3", "");
+      let baseUrl = s3Endpoint.replace("/s3", "");
+      // Supabase specific fix: The S3 API uses .storage.supabase.co, but public URLs must use .supabase.co
+      baseUrl = baseUrl.replace(".storage.supabase.co", ".supabase.co");
       fileUrl = `${baseUrl}/object/public/${bucket}/${filename}`;
     } else {
       // It's local
