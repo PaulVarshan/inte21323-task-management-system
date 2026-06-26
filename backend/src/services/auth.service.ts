@@ -60,6 +60,7 @@ export const loginUser = async (
   });
 
   if (!user) {
+    console.log("loginUser: user not found for email", email);
     throw new Error("Invalid credentials");
   }
 
@@ -73,6 +74,7 @@ export const loginUser = async (
   );
 
   if (!validPassword) {
+    console.log("loginUser: validPassword false for email", email);
     throw new Error("Invalid credentials");
   }
 
@@ -93,6 +95,7 @@ export const loginUser = async (
   else if (allowedRoles.includes("Collaborator") && roleNames.includes("Collaborator")) roleName = "Collaborator";
 
   if (!roleName) {
+    console.log("loginUser: roleName empty. allowedRoles:", allowedRoles, "roleNames:", roleNames);
     throw new Error("Invalid credentials");
   }
 

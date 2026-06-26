@@ -2,7 +2,6 @@ import { Router } from "express";
 import { authenticate } from "../middleware/auth.middleware";
 
 import {
-  register,
   login,
   adminLogin,
   logout,
@@ -15,42 +14,6 @@ import {
 
 const router = Router();
 
-/**
- * @swagger
- * /api/auth/register:
- *   post:
- *     summary: Register a new user
- *     description: Creates a new user account.
- *     tags: [Authentication]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [username, email, password]
- *             properties:
- *               username:
- *                 type: string
- *                 example: "johndoe"
- *               email:
- *                 type: string
- *                 example: "john@example.com"
- *               password:
- *                 type: string
- *                 example: "SecurePass123!"
- *     responses:
- *       201:
- *         description: Successfully registered
- *         content:
- *           application/json:
- *             schema: { $ref: "#/components/schemas/SuccessResponse" }
- *       400:
- *         $ref: "#/components/responses/BadRequest"
- *       500:
- *         $ref: "#/components/responses/ServerError"
- */
-router.post("/register", register);
 /**
  * @swagger
  * /api/auth/login:
