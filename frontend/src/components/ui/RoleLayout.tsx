@@ -95,10 +95,7 @@ export const RoleLayout = ({ roleName, navItems }: { roleName: string, navItems:
         {/* Brand / Logo */}
         <div style={{ padding: '0 1.5rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ width: '32px', height: '32px', background: '#34d399', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: '#0c1810', fontWeight: 'bold', fontSize: '1.2rem' }}>D</span>
-            </div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#fff', margin: 0, whiteSpace: 'nowrap' }}>Donezo</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#fff', margin: 0, whiteSpace: 'nowrap' }}>Task System</h2>
           </div>
           {isMobile && (
             <button onClick={() => setIsSidebarOpen(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
