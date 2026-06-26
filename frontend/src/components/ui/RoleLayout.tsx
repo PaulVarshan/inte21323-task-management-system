@@ -248,7 +248,7 @@ export const RoleLayout = ({ roleName, navItems }: { roleName: string, navItems:
         {/* USER ACCOUNT Section */}
         <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
           <div style={{ padding: '0 1.5rem', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: '1px' }}>USER ACCOUNT</span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: '1px' }}>{user?.username?.toUpperCase() || 'USER ACCOUNT'}</span>
           </div>
 
           <div 

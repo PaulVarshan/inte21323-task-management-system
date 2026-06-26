@@ -13,7 +13,7 @@ export const CollaboratorLayout = () => {
       ]
     },
     { path: '/collaborator/projects', label: 'Project Details' },
-    { path: '/collaborator/comments', label: 'Comments' },
+
     { path: '/collaborator/attachments', label: 'Attachments' },
     { path: '/collaborator/notifications', label: 'Notifications' },
   ];
