@@ -3,8 +3,7 @@ name: Deploy to AWS EC2
 on:
   push:
     branches:
-      - dockerContainerization
-      - main # Will also trigger when you merge to main
+      - master # Triggers automatically when you push or merge to master
 
 jobs:
   deploy:
@@ -30,11 +29,11 @@ jobs:
             # Authenticate git pull for future runs
             git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
             
-            # Fetch the latest code from the branch
+            # Fetch the latest code from the master branch
             git fetch --all
-            git checkout dockerContainerization
-            git reset --hard origin/dockerContainerization
-            git pull origin dockerContainerization
+            git checkout master
+            git reset --hard origin/master
+            git pull origin master
             
             # Recreate the .env files from GitHub Secrets since they are not in Git
             echo "${{ secrets.BACKEND_ENV }}" > backend/.env
