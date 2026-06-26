@@ -19,9 +19,19 @@ export const uploadAttachment = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ success: false, message: "No file uploaded or file type not allowed" });
     }
 
-    // With multer-s3, the S3 URL is stored in req.file.location, and the filename in req.file.key
-    const fileUrl = (req.file as any).location || `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
     const filename = (req.file as any).key || req.file.filename;
+
+    let fileUrl = "";
+    if ((req.file as any).key) {
+      // It's S3. Convert the internal S3 API endpoint to the public Object URL
+      const bucket = process.env.S3_BUCKET_NAME || "task-attachments";
+      const s3Endpoint = process.env.S3_ENDPOINT || "https://vyxunfpwynglcmqdalto.storage.supabase.co/storage/v1/s3";
+      const baseUrl = s3Endpoint.replace("/s3", "");
+      fileUrl = `${baseUrl}/object/public/${bucket}/${filename}`;
+    } else {
+      // It's local
+      fileUrl = `${req.protocol}://${req.get("host")}/uploads/${filename}`;
+    }
 
     const attachment = await attachmentService.createAttachment(
       userId,
