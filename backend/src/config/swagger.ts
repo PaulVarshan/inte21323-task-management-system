@@ -119,6 +119,8 @@ Note on Schemas: Manual schemas are defined here for Swagger documentation. Plea
             username: { type: "string", example: "johndoe" },
             email: { type: "string", example: "john@example.com" },
             is_active: { type: "boolean", example: true },
+            reset_token: { type: "string", nullable: true, example: "null" },
+            reset_token_expires: { type: "string", format: "date-time", nullable: true, example: "null" },
             created_at: { type: "string", format: "date-time", example: "2023-10-25T14:30:00.000Z" },
             user_roles: {
               type: "array",
