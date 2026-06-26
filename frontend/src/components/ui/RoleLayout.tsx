@@ -33,6 +33,26 @@ export const RoleLayout = ({ roleName, navItems }: { roleName: string, navItems:
   const navigate = useNavigate();
   const location = useLocation();
 
+  const getHeaderTitle = () => {
+    const path = location.pathname;
+    if (path.includes('/users/edit/')) return 'Edit User';
+    if (path.includes('/users')) return 'User Management';
+    if (path.includes('/projects/new')) return 'Create Project';
+    if (path.includes('/projects/edit/')) return 'Edit Project';
+    if (path.includes('/projects/')) return 'Project Details';
+    if (path.includes('/projects')) return 'Projects';
+    if (path.includes('/tasks/new')) return 'Create Task';
+    if (path.includes('/tasks/edit/')) return 'Edit Task';
+    if (path.includes('/tasks/kanban')) return 'Kanban Board';
+    if (path.includes('/tasks')) return 'Tasks';
+    if (path.includes('/teams/new')) return 'Add Team Member';
+    if (path.includes('/teams')) return 'Teams';
+    if (path.includes('/attachments')) return 'Attachments';
+    if (path.includes('/notifications')) return 'Notifications';
+    if (path.includes('/dashboard')) return 'Dashboard';
+    return 'Dashboard';
+  };
+
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
 
@@ -283,7 +303,7 @@ export const RoleLayout = ({ roleName, navItems }: { roleName: string, navItems:
             >
               <Menu size={24} color="#fff" />
             </button>
-            <h1 style={{ margin: 0, fontWeight: 700, fontSize: '1.75rem', color: '#fff', letterSpacing: '-0.5px' }}>Dashboard</h1>
+            <h1 style={{ margin: 0, fontWeight: 700, fontSize: '1.75rem', color: '#fff', letterSpacing: '-0.5px' }}>{getHeaderTitle()}</h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
             <NotificationBell />
