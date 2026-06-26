@@ -46,14 +46,6 @@ export const SplitAuthLayout: React.FC<SplitAuthLayoutProps> = ({ isLogin, child
         </h2>
         
         <div style={{ width: '100%' }}>{children}</div>
-
-        <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
-          {isLogin ? (
-            <>Don't have an account? <Link to="/register" style={{ color: 'var(--primary-color)', fontWeight: 600, textDecoration: 'none' }}>Sign up</Link></>
-          ) : (
-            <>Already have an account? <Link to="/login" style={{ color: 'var(--primary-color)', fontWeight: 600, textDecoration: 'none' }}>Sign in</Link></>
-          )}
-        </div>
       </div>
     </div>
   );

@@ -127,7 +127,6 @@ export const UsersPage: React.FC = () => {
                   outline: 'none',
                 }}
               >
-                <option value="Admin">Admin</option>
                 <option value="Project Manager">Project Manager</option>
                 <option value="Collaborator">Collaborator</option>
               </select>

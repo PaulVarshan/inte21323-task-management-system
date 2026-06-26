@@ -37,11 +37,6 @@ export const LandingPage: React.FC = () => {
               Sign In
             </Button>
           </Link>
-          <Link to="/register" style={{ textDecoration: 'none' }}>
-            <Button style={{ padding: '0.75rem 2rem', fontSize: '1.1rem', background: 'transparent', color: 'var(--primary-color)', border: '2px solid var(--primary-color)' }}>
-              Create Account
-            </Button>
-          </Link>
         </div>
 
         <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--surface-border)', width: '100%' }}>

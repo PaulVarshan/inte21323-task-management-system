@@ -24,6 +24,10 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ success: false, message: "Username, email, and role are required" });
     }
 
+    if (role === "Admin") {
+      return res.status(403).json({ success: false, message: "Cannot create a user with the Admin role" });
+    }
+
     // Generate a strong random password
     const plainTextPassword = require('crypto').randomBytes(8).toString('hex') + 'Aa1!';
     const passwordHash = await require('bcryptjs').hash(plainTextPassword, 10);
@@ -82,6 +86,8 @@ export const changeUserRole = async (req: AuthRequest, res: Response) => {
     const userId = parseInt(req.params.id as string);
     const { role } = req.body;
     if (!role) return res.status(400).json({ success: false, message: "Role is required" });
+    
+    if (role === "Admin") return res.status(403).json({ success: false, message: "Cannot assign the Admin role" });
     
     const user = await userService.changeUserRole(userId, role);
     return res.status(200).json({ success: true, message: "User role updated", data: user });

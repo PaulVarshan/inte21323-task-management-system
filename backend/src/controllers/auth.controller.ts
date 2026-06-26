@@ -44,14 +44,9 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password, role } = req.body;
-    // Normal login only allows Collaborator and Project Manager
-    let allowedRoles = ["Collaborator", "Project Manager"];
-    
-    // If a specific role was requested from the UI dropdown, restrict login to that role
-    if (role && allowedRoles.includes(role)) {
-      allowedRoles = [role];
-    }
+    const { email, password } = req.body;
+    // Allow all roles to login through the normal portal as requested
+    const allowedRoles = ["Admin", "Project Manager", "Collaborator"];
     
     const result = await loginUser(email, password, allowedRoles);
     
@@ -221,17 +216,13 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
-    let { email, role } = req.body;
+    let { email } = req.body;
     
-    if (!email || !role) {
-      return res.status(400).json({ success: false, message: "Email and role are required" });
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
     }
 
     email = email.trim();
-
-    if (role === "Admin") {
-      return res.status(403).json({ success: false, message: "Email not found or reset not allowed" });
-    }
 
     const user = await prisma.user.findUnique({
       where: { email },
@@ -239,16 +230,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({ success: false, message: "Email not found or reset not allowed" });
-    }
-
-    const userRoles = user.user_roles.map(ur => ur.role.role_name);
-    if (!userRoles.includes(role)) {
-      return res.status(400).json({ success: false, message: "Email not found or reset not allowed" });
-    }
-
-    if (userRoles.includes("Admin")) {
-      return res.status(403).json({ success: false, message: "Email not found or reset not allowed" });
+      return res.status(404).json({ success: false, message: "Email not found" });
     }
 
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();

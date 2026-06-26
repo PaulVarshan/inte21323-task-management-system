@@ -2,6 +2,8 @@ import prisma from "../config/prisma";
 import fs from "fs";
 import path from "path";
 import { createNotification } from "./notification.service";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { s3Config } from "../config/multer";
 
 export const createAttachment = async (userId: number, taskId: number, filename: string, fileUrl: string) => {
   // Verify task exists
@@ -112,7 +114,20 @@ export const deleteAttachment = async (attachmentId: number, userId: number, rol
     throw new Error("Unauthorized to delete this attachment");
   }
 
-  // Delete local file
+  // Delete from S3 if configured
+  if (process.env.S3_ACCESS_KEY_ID) {
+    try {
+      const command = new DeleteObjectCommand({
+        Bucket: process.env.S3_BUCKET_NAME || "task-attachments",
+        Key: attachment.file_name
+      });
+      await s3Config.send(command);
+    } catch (err) {
+      console.error("Failed to delete from S3:", err);
+    }
+  }
+
+  // Delete local file (fallback for old files)
   const filePath = path.join(process.cwd(), "uploads", attachment.file_name);
   try {
     if (fs.existsSync(filePath)) {
