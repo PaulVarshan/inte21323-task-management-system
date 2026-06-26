@@ -21,12 +21,12 @@ Note on Schemas: Manual schemas are defined here for Swagger documentation. Plea
     },
     servers: [
       {
-        url: "http://localhost:5000",
-        description: "Local development server",
+        url: "http://51.20.116.232:5000",
+        description: "Live Production Server (AWS)",
       },
       {
-        url: "https://api.yourdomain.com",
-        description: "Production server placeholder",
+        url: "http://localhost:5000",
+        description: "Local development server",
       },
     ],
     tags: [
