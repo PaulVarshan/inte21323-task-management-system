@@ -22,10 +22,13 @@ jobs:
             
             # Navigate to the project directory (or clone it if it doesn't exist)
             if [ ! -d "task-management-system" ]; then
-              git clone https://github.com/superjack2k4/inte21323-task-management-system.git task-management-system
+              git clone https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git task-management-system
             fi
             
             cd task-management-system
+            
+            # Authenticate git pull for future runs
+            git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
             
             # Fetch the latest code from the branch
             git fetch --all
