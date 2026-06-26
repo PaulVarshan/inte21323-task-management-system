@@ -30,6 +30,7 @@ const getIconForLabel = (label: string) => {
 
 export const RoleLayout = ({ roleName, navItems }: { roleName: string, navItems: NavItem[] }) => {
   const { user, logout } = useAuth();
+  console.log("Current user:", user);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -250,6 +251,56 @@ export const RoleLayout = ({ roleName, navItems }: { roleName: string, navItems:
           <div style={{ padding: '0 1.5rem', marginBottom: '0.75rem' }}>
             <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: '1px' }}>USER ACCOUNT</span>
           </div>
+
+          {user && (
+            <div style={{
+              margin: '0 1rem 0.75rem 1rem',
+              padding: '0.65rem 1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              background: 'rgba(255, 255, 255, 0.03)',
+              borderRadius: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.05)'
+            }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                minWidth: '32px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fff',
+                fontWeight: 'bold',
+                fontSize: '0.9rem'
+              }}>
+                {user.username.charAt(0).toUpperCase()}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <span style={{ 
+                  fontSize: '0.9rem', 
+                  fontWeight: 600, 
+                  color: '#fff',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {user.username}
+                </span>
+                <span style={{ 
+                  fontSize: '0.75rem', 
+                  color: '#9ca3af',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {user.role}
+                </span>
+              </div>
+            </div>
+          )}
 
           <div 
             onClick={handleLogout}

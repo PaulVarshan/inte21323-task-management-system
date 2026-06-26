@@ -21,6 +21,8 @@ export const TeamsListPage: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [addingMember, setAddingMember] = useState(false);
   const [selectedUserToAdd, setSelectedUserToAdd] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -89,6 +91,8 @@ export const TeamsListPage: React.FC = () => {
         }]);
       }
       setSelectedUserToAdd('');
+      setSearchQuery('');
+      setIsDropdownOpen(false);
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to add member');
     } finally {
@@ -118,7 +122,7 @@ export const TeamsListPage: React.FC = () => {
             projects.map(project => (
               <div 
                 key={project.project_id} 
-                onClick={() => setSelectedProject(project)}
+                onClick={() => { setSelectedProject(project); setSearchQuery(''); setIsDropdownOpen(false); }}
                 style={{ 
                   padding: '1.5rem', 
                   background: 'rgba(255,255,255,0.05)', 
@@ -165,7 +169,7 @@ export const TeamsListPage: React.FC = () => {
             position: 'relative'
           }}>
             <button 
-              onClick={() => setSelectedProject(null)}
+              onClick={() => { setSelectedProject(null); setSearchQuery(''); setIsDropdownOpen(false); }}
               style={{
                 position: 'absolute',
                 top: '1rem', right: '1.5rem',
@@ -238,31 +242,107 @@ export const TeamsListPage: React.FC = () => {
               </table>
             </div>
 
-            <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-              <select
-                className="input-field"
-                value={selectedUserToAdd}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setSelectedUserToAdd(val);
-                  if (val) {
-                    handleAddMember(selectedProject.project_id, Number(val));
-                  }
+            <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', position: 'relative' }}>
+              {/* Custom Dropdown Trigger Button */}
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                style={{ 
+                  width: '100%', 
+                  padding: '0.75rem 1rem', 
+                  background: 'var(--primary-color)', 
+                  color: '#fff', 
+                  border: 'none', 
+                  cursor: 'pointer', 
+                  borderRadius: '8px', 
+                  fontSize: '1rem', 
+                  fontWeight: 500, 
+                  marginBottom: 0,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
                 }}
-                style={{ width: '100%', padding: '0.75rem 1rem', background: 'var(--primary-color)', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: '8px', fontSize: '1rem', fontWeight: 500, marginBottom: 0 }}
                 disabled={addingMember}
               >
-                <option value="" disabled>{addingMember ? 'Adding...' : 'Add member...'}</option>
-                {allUsers
-                  .filter(u => u.role === 'Collaborator' && !getProjectMembers(selectedProject.project_id).some(m => m.user_id === u.user_id))
-                  .map(u => (
-                    <option key={u.user_id} value={u.user_id} style={{ background: 'var(--surface-color)', color: 'var(--text-primary)' }}>
-                      {u.username} ({u.email})
-                    </option>
-                  ))
-                }
-              </select>
-              <Button style={{ width: '100%', background: 'var(--surface-color)', color: 'var(--text-primary)', border: '1px solid var(--surface-border)' }} onClick={() => setSelectedProject(null)}>Close</Button>
+                <span>{addingMember ? 'Adding...' : 'Add member...'}</span>
+                <span>{isDropdownOpen ? '▲' : '▼'}</span>
+              </button>
+
+              {/* Custom Searchable Dropdown Overlay */}
+              {isDropdownOpen && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: 0,
+                  right: 0,
+                  background: 'var(--surface-color)',
+                  border: '1px solid var(--surface-border)',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                  zIndex: 1100,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  maxHeight: '300px',
+                  padding: '0.5rem',
+                  marginBottom: '5px'
+                }}>
+                  {/* Scrollable member options */}
+                  <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '0.5rem', maxHeight: '200px' }}>
+                    {allUsers
+                      .filter(u => u.role === 'Collaborator' && !getProjectMembers(selectedProject.project_id).some(m => m.user_id === u.user_id))
+                      .filter(u =>
+                        u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        u.email.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
+                      .map(u => (
+                        <div
+                          key={u.user_id}
+                          onClick={() => handleAddMember(selectedProject.project_id, u.user_id)}
+                          style={{
+                            padding: '0.6rem 0.8rem',
+                            cursor: 'pointer',
+                            borderRadius: '4px',
+                            transition: 'background 0.2s',
+                            fontSize: '0.9rem',
+                            textAlign: 'left',
+                            color: 'var(--text-primary)'
+                          }}
+                          onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                          onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          {u.username} ({u.email})
+                        </div>
+                      ))
+                    }
+                    {allUsers
+                      .filter(u => u.role === 'Collaborator' && !getProjectMembers(selectedProject.project_id).some(m => m.user_id === u.user_id))
+                      .filter(u =>
+                        u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        u.email.toLowerCase().includes(searchQuery.toLowerCase())
+                      ).length === 0 && (
+                        <div style={{ padding: '0.6rem 0.8rem', color: 'var(--text-secondary)', fontSize: '0.9rem', textAlign: 'left' }}>
+                          No users found
+                        </div>
+                      )
+                    }
+                  </div>
+
+                  {/* Search box at the bottom of the dropdown */}
+                  <div style={{ borderTop: '1px solid var(--surface-border)', paddingTop: '0.5rem' }}>
+                    <input
+                      type="text"
+                      placeholder="Search users to add..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="input-field"
+                      style={{ marginBottom: 0, background: 'rgba(0,0,0,0.2)', color: 'var(--text-primary)' }}
+                      autoFocus
+                    />
+                  </div>
+                </div>
+              )}
+
+              <Button style={{ width: '100%', background: 'var(--surface-color)', color: 'var(--text-primary)', border: '1px solid var(--surface-border)' }} onClick={() => { setSelectedProject(null); setSearchQuery(''); setIsDropdownOpen(false); }}>Close</Button>
             </div>
           </div>
         </div>

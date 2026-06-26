@@ -20,7 +20,12 @@ export const AddTeamMemberPage: React.FC = () => {
   const [members, setMembers] = useState<MemberSelection[]>([{ userId: '', role: 'MEMBER' }]);
   
   const [existingMembers, setExistingMembers] = useState<ProjectMember[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const filteredUsers = users.filter(u =>
+    u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -171,6 +176,14 @@ export const AddTeamMemberPage: React.FC = () => {
             {members.map((member, index) => (
               <div key={index} style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
                 <div style={{ flex: 2 }}>
+                  <input
+                    type="text"
+                    placeholder="Search users by name or email..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="input-field"
+                    style={{ marginBottom: '0.5rem' }}
+                  />
                   <select 
                     className="input-field" 
                     style={{ marginBottom: 0 }}
@@ -179,7 +192,7 @@ export const AddTeamMemberPage: React.FC = () => {
                     required
                   >
                     <option value="">Select User...</option>
-                    {users.map(u => (
+                    {filteredUsers.map(u => (
                       <option key={u.user_id} value={u.user_id}>{u.username} ({u.email})</option>
                     ))}
                   </select>
