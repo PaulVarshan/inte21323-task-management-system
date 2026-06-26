@@ -1,0 +1,51 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - dockerContainerization
+      - main # Will also trigger when you merge to main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e # Exit immediately if any command fails
+            
+            # Navigate to the project directory (or clone it if it doesn't exist)
+            if [ ! -d "task-management-system" ]; then
+              git clone https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git task-management-system
+            fi
+            
+            cd task-management-system
+            
+            # Authenticate git pull for future runs
+            git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            
+            # Fetch the latest code from the branch
+            git fetch --all
+            git checkout dockerContainerization
+            git reset --hard origin/dockerContainerization
+            git pull origin dockerContainerization
+            
+            # Recreate the .env files from GitHub Secrets since they are not in Git
+            echo "${{ secrets.BACKEND_ENV }}" > backend/.env
+            echo "${{ secrets.FRONTEND_ENV }}" > frontend/.env
+            
+            # Build sequentially to avoid Out of Memory (OOM) errors on 1GB EC2 instances
+            sudo docker compose build backend
+            sudo docker compose build frontend
+            
+            # Restart Docker containers in the background
+            sudo docker compose up -d
+            
+            # Clean up old unused docker images to save EC2 disk space
+            sudo docker image prune -f
