@@ -18,6 +18,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e # Exit immediately if any command fails
+            
             # Navigate to the project directory (or clone it if it doesn't exist)
             if [ ! -d "task-management-system" ]; then
               git clone https://github.com/superjack2k4/inte21323-task-management-system.git task-management-system
@@ -35,8 +37,12 @@ jobs:
             echo "${{ secrets.BACKEND_ENV }}" > backend/.env
             echo "${{ secrets.FRONTEND_ENV }}" > frontend/.env
             
-            # Build and restart Docker containers in the background
-            sudo docker-compose up -d --build
+            # Build sequentially to avoid Out of Memory (OOM) errors on 1GB EC2 instances
+            sudo docker-compose build backend
+            sudo docker-compose build frontend
+            
+            # Restart Docker containers in the background
+            sudo docker-compose up -d
             
             # Clean up old unused docker images to save EC2 disk space
             sudo docker image prune -f
