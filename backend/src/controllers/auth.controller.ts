@@ -236,10 +236,12 @@ export const forgotPassword = async (req: Request, res: Response) => {
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
+    const hashedOtp = await bcrypt.hash(otpCode, 10);
+
     await prisma.user.update({
       where: { user_id: user.user_id },
       data: {
-        reset_token: otpCode,
+        reset_token: hashedOtp,
         reset_token_expires: resetTokenExpires
       }
     });
@@ -269,14 +271,18 @@ export const resetPassword = async (req: Request, res: Response) => {
     const user = await prisma.user.findFirst({
       where: {
         email: email.trim(),
-        reset_token: otp.trim(),
         reset_token_expires: {
           gt: new Date()
         }
       }
     });
 
-    if (!user) {
+    if (!user || !user.reset_token) {
+      return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
+    }
+
+    const isOtpValid = await bcrypt.compare(otp.trim(), user.reset_token);
+    if (!isOtpValid) {
       return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
     }
 
