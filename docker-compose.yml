@@ -16,7 +16,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5173:80" # Mapping to 5173 so it matches your local development port
+      - "80:80" # Serve on standard HTTP port for production
     restart: unless-stopped
     depends_on:
       - backend
