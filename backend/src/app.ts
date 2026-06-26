@@ -18,6 +18,7 @@ const app = express();
 
 app.use(helmet({
   crossOriginResourcePolicy: false,
+  contentSecurityPolicy: false,
 }));
 
 app.use(cors({

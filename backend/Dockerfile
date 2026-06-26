@@ -35,6 +35,9 @@ RUN npm ci --omit=dev
 # Copy compiled code from builder
 COPY --from=builder /app/dist ./dist
 
+# Copy src/routes so Swagger JSDoc can parse API annotations in production
+COPY --from=builder /app/src/routes ./src/routes
+
 # Copy prisma schema just in case it's needed for migrations or checking
 COPY prisma ./prisma
 
