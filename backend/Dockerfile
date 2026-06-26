@@ -19,7 +19,7 @@ RUN npx prisma generate
 
 # Build TypeScript code (compiles to dist/)
 RUN npm run build
-
+RUN cp -r src/generated/prisma/*.node dist/generated/prisma/
 # Stage 2: Production
 FROM node:20-alpine
 
