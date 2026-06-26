@@ -41,11 +41,11 @@ jobs:
             echo "${{ secrets.FRONTEND_ENV }}" > frontend/.env
             
             # Build sequentially to avoid Out of Memory (OOM) errors on 1GB EC2 instances
-            sudo docker-compose build backend
-            sudo docker-compose build frontend
+            sudo docker compose build backend
+            sudo docker compose build frontend
             
             # Restart Docker containers in the background
-            sudo docker-compose up -d
+            sudo docker compose up -d
             
             # Clean up old unused docker images to save EC2 disk space
             sudo docker image prune -f
