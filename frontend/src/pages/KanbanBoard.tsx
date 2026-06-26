@@ -165,6 +165,12 @@ export const KanbanBoard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
+  // Rejection modal state
+  const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [rejectionError, setRejectionError] = useState('');
+  const [pendingRejection, setPendingRejection] = useState<{ taskId: number; newStatus: StatusColumn; originalStatus: string } | null>(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
@@ -185,27 +191,60 @@ export const KanbanBoard: React.FC = () => {
       return;
     }
 
-    let commentContent = "";
     if (taskData.status === 'REVIEW' && newStatus === 'IN_PROGRESS' && user?.role !== 'Collaborator') {
-      const reason = window.prompt("Reason for rejecting and moving back to In Progress:");
-      if (reason === null) return; // User cancelled
-      commentContent = reason;
+      setPendingRejection({
+        taskId,
+        newStatus,
+        originalStatus: taskData.status
+      });
+      setRejectionReason('');
+      setRejectionError('');
+      setRejectionModalOpen(true);
+      return;
     }
 
+    await executeStatusChange(taskId, newStatus, taskData.status);
+  };
+
+  const executeStatusChange = async (taskId: number, newStatus: string, originalStatus: string, reason?: string) => {
     // Optimistic update
     setTasks(prev => prev.map(t => t.task_id === taskId ? { ...t, status: newStatus } : t));
 
     try {
-      if (commentContent) {
-        await createComment(taskId, commentContent);
+      if (reason) {
+        await createComment(taskId, reason);
       }
       await updateTask(taskId, { status: newStatus });
     } catch (err: any) {
       console.error(err);
       setError(err?.message || 'Failed to update task status');
       // Revert on error
-      setTasks(prev => prev.map(t => t.task_id === taskId ? { ...t, status: taskData.status } : t));
+      setTasks(prev => prev.map(t => t.task_id === taskId ? { ...t, status: originalStatus } : t));
     }
+  };
+
+  const handleConfirmRejection = async () => {
+    if (!rejectionReason.trim()) {
+      setRejectionError('Please enter a reason for rejection.');
+      return;
+    }
+    if (!pendingRejection) return;
+
+    const { taskId, newStatus, originalStatus } = pendingRejection;
+    const reasonToSet = rejectionReason.trim();
+
+    setRejectionModalOpen(false);
+    setPendingRejection(null);
+    setRejectionReason('');
+
+    await executeStatusChange(taskId, newStatus, originalStatus, reasonToSet);
+  };
+
+  const handleCancelRejection = () => {
+    setRejectionModalOpen(false);
+    setPendingRejection(null);
+    setRejectionReason('');
+    setRejectionError('');
   };
 
   const loadData = async () => {
@@ -365,6 +404,111 @@ export const KanbanBoard: React.FC = () => {
           onClose={() => setSelectedTask(null)}
           onTaskUpdated={loadData}
         />
+      )}
+      {rejectionModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1300,
+          padding: '1rem'
+        }} onClick={handleCancelRejection}>
+          <div style={{
+            width: '100%',
+            maxWidth: '480px',
+            background: 'linear-gradient(135deg, #1b3222 0%, #0c1810 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '2rem',
+            color: '#fff',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4)',
+            position: 'relative'
+          }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', fontWeight: 600, color: '#fff' }}>Reason for Rejection</h3>
+            
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => {
+                setRejectionReason(e.target.value);
+                if (e.target.value.trim()) setRejectionError('');
+              }}
+              placeholder="Type the reason for rejection here..."
+              style={{
+                width: '100%',
+                height: '120px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: rejectionError ? '1px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '10px',
+                color: '#fff',
+                padding: '0.75rem',
+                fontSize: '0.95rem',
+                resize: 'none',
+                outline: 'none',
+                fontFamily: 'inherit',
+                transition: 'border-color 0.2s'
+              }}
+            />
+            {rejectionError && (
+              <div style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.5rem' }}>
+                {rejectionError}
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
+              <button 
+                onClick={handleCancelRejection}
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: '#9ca3af',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '10px',
+                  padding: '0.6rem 1.2rem',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: 500,
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.color = '#fff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.color = '#9ca3af';
+                }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleConfirmRejection}
+                style={{
+                  background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  padding: '0.6rem 1.2rem',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 0 12px rgba(16, 185, 129, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(16, 185, 129, 0.2)';
+                }}
+              >
+                Confirm Rejection
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

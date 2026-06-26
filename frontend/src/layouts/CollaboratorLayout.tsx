@@ -12,7 +12,6 @@ export const CollaboratorLayout = () => {
         { path: '/collaborator/tasks/kanban', label: '⊞  Kanban Board' },
       ]
     },
-    { path: '/collaborator/tasks/kanban', label: 'Kanban Board' },
     { path: '/collaborator/projects', label: 'Project Details' },
     { path: '/collaborator/comments', label: 'Comments' },
     { path: '/collaborator/attachments', label: 'Attachments' },
