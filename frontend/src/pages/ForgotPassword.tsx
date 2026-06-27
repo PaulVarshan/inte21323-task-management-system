@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthCard } from '../components/ui/AuthCard';
 import { InputField } from '../components/ui/InputField';
@@ -10,14 +10,42 @@ export const ForgotPasswordPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  const [cooldown, setCooldown] = useState(() => {
+    const saved = localStorage.getItem('otp_cooldown_time');
+    if (saved) {
+      const remaining = Math.floor((parseInt(saved) - Date.now()) / 1000);
+      return remaining > 0 ? remaining : 0;
+    }
+    return 0;
+  });
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldown > 0) {
+      timer = setInterval(() => {
+        setCooldown((prev) => {
+          if (prev <= 1) {
+            localStorage.removeItem('otp_cooldown_time');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (cooldown > 0) return;
+    
     setIsLoading(true);
     setError('');
 
     try {
       await api.post('/forgot-password', { email });
+      localStorage.setItem('otp_cooldown_time', (Date.now() + 60000).toString());
+      setCooldown(60);
       navigate('/reset-password', { state: { email } });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Email not found or reset not allowed');
@@ -40,8 +68,8 @@ export const ForgotPasswordPage: React.FC = () => {
         />
         
         {error && <div className="error-message" style={{ marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
-        <Button type="submit" isLoading={isLoading}>
-          Send OTP
+        <Button type="submit" isLoading={isLoading} disabled={cooldown > 0}>
+          {cooldown > 0 ? `Please wait ${cooldown}s...` : 'Send OTP'}
         </Button>
       </form>
       
