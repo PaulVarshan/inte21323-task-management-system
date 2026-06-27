@@ -21,7 +21,7 @@ Note on Schemas: Manual schemas are defined here for Swagger documentation. Plea
     },
     servers: [
       {
-        url: "http://51.20.116.232:5000",
+        url: "http://16.171.216.35:5000",
         description: "Live Production Server (AWS)",
       },
       {

@@ -97,7 +97,7 @@ The application will be accessible at `http://localhost`.
 The backend API is fully documented using Swagger UI. Once the backend server is running, you can explore the API endpoints, view request/response schemas, and test the endpoints directly from your browser.
 
 **Swagger UI URL:**
-`http://51.20.116.232:5000/api-docs/#/Authentication/post_api_auth_login`
+`http://16.171.216.35:5000/api-docs/#/Authentication/post_api_auth_login`
 
 
 ## 👥 Team Member Contributions
